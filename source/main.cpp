@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include "Logger.h"
+#include "Parser.h"
 
 void parseInput(int argc, const char * argv[], string &file_name)
 {
@@ -13,7 +14,7 @@ void parseInput(int argc, const char * argv[], string &file_name)
     {
         throw string("Invalid number of arguments");
     }
-    file_name = string(argv[0]);
+    file_name = string(argv[1]);
 }
 
 int main(int argc, const char * argv[])
@@ -38,7 +39,9 @@ int main(int argc, const char * argv[])
         return -1;
     }
     
-    
+    Parser* parser = new Parser(logger);
+
+    parser->load_file(file_name);
     
     delete logger;
     return 0;
