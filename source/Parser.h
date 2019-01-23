@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Logger.h"
 #include <string>
+#include <fstream>
 using namespace std;
 
 
@@ -15,10 +16,14 @@ class Parser
 {
 public:
     Parser(Logger* logger);
-    void load_file(string file_name);
+    ~Parser();
+    bool load_file(string file_name);
     
 private:
     Logger* _logger;
+    ifstream _character_stream;
+
+
 };
 
 #endif 

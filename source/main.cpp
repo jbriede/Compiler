@@ -8,12 +8,14 @@
 #include "Logger.h"
 #include "Parser.h"
 
-void parseInput(int argc, const char * argv[], string &file_name)
+void parse_input(int argc, const char * argv[], string &file_name)
 {
+
     if (argc != 2)
     {
         throw string("Invalid number of arguments");
     }
+
     file_name = string(argv[1]);
 }
 
@@ -30,7 +32,7 @@ int main(int argc, const char * argv[])
     string file_name;
     try
     {
-        parseInput(argc, argv, file_name);
+        parse_input(argc, argv, file_name);
     }
     catch(string exception)
     {
@@ -38,11 +40,19 @@ int main(int argc, const char * argv[])
         logger->error("Argument format is \"j++ filename\"");
         return -1;
     }
-    
-    Parser* parser = new Parser(logger);
+    catch(std::exception& e) {
+        logger->error("unknown error");
+        logger->error(e.what());
+        return -1;
+    }
 
-    parser->load_file(file_name);
+    Parser* parser = new Parser(logger);
+    if (!parser->load_file(file_name))
+    {
+        return -1;
+    }
     
+    delete parser;
     delete logger;
     return 0;
 }
