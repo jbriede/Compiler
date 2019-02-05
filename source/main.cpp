@@ -51,6 +51,11 @@ int main(int argc, const char * argv[])
     {
         return -1;
     }
+
+    if (!parser->lexical_analysis())
+    {
+        return -1;
+    }
     
     delete parser;
     delete logger;

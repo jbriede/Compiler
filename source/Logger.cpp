@@ -45,5 +45,5 @@ void Logger::warn(string message)
 void Logger::error(string message)
 {
     /* We always do this one */
-    cout << "Error: " << message << endl;
+    cout << "\n\n *** Error: " << message << endl << endl << endl;
 }
