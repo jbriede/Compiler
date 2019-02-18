@@ -36,7 +36,7 @@ struct Symbol
 
 struct Token {
     uint16_t token_name;
-    Symbol* attribute_value;
+    Symbol* symbol;
     uint16_t line_number;
 };
 
@@ -52,25 +52,27 @@ private:
     Logger* _logger;
     ifstream _character_stream;
     void get_character_from_stream(char* character);
-
-    Symbol* _symbols;
-
-    Token * _tokens;
-
-    int _symbol_count;
-    int _token_count;
-    int _long_comment_count;
-    
-    
-    
     // Lexer
-    Token get_token_name();
-    string current_word;
+    Token get_token();
+    string _current_word;
     int current_lexer_line;
     char* c;
-    bool long_comment_mode;
-    bool single_line_comment_mode;
     void search_symbols(Symbol* symbol, const char* symbol_string);
+    int _comment_depth;
+    bool _end_of_token(char* character);
+
+
+
+    // Symbol* _symbols;
+
+    // Token * _tokens;
+
+    // int _symbol_count;
+    // int _token_count;
+    
+    
+    
+
 
 
 

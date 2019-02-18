@@ -8,15 +8,14 @@
 Parser::Parser(Logger* logger)
 {
     _logger = logger;
-    current_word = "";
+    _current_word = "";
     current_lexer_line = 1;
     c = new char();
-    long_comment_mode = false;
-    single_line_comment_mode = false;
-    _symbols = new Symbol[SYMBOL_TABLE_SIZE];
-    _tokens = new Token[TOKEN_ARRAY_MAX_SIZE];
-    _symbol_count = 0;
-    _token_count = 0;
+    // _symbols = new Symbol[SYMBOL_TABLE_SIZE];
+    // _tokens = new Token[TOKEN_ARRAY_MAX_SIZE];
+    // _symbol_count = 0;
+    // _token_count = 0;
+    _comment_depth = 0;
 }
 
 Parser::~Parser()
@@ -74,116 +73,128 @@ void Parser::get_character_from_stream(char* character)
     }
 }
 
-Token Parser::get_token_name()
+Token Parser::get_token()
 {
     
     Token token;
-    token.attribute_value = NULL;
-    if (current_word == "")
+    token.symbol = NULL;
+    if (_current_word == "")
     {
 
         get_character_from_stream(c);
-        current_word += *c;
+        _current_word += *c;
     }
 
-    if (current_word == "/")
+    if (_current_word == "/")
     {
         get_character_from_stream(c);
-        current_word += *c;
-        if (current_word == "//")
+        _current_word += *c;
+        if (_current_word == "/*")
         {
-            TOKEN_NAMES name = COMMENT_SINGLE_LINE;
-            token.token_name = name;
-            
-            token.line_number = current_lexer_line;
-            current_word = "";
-            return token;
-        }
-        else if (current_word == "/*")
-        {
-            TOKEN_NAMES name = COMMENT_OPEN;
-            token.token_name = name;
-            token.line_number = current_lexer_line;
-            current_word = "";
-            return token;
+            _current_word = "";
+            _comment_depth++;
+            return get_token();
         }
         else
         {
             TOKEN_NAMES name = DIVISION;
             token.token_name = name;
             token.line_number = current_lexer_line;
-            current_word = current_word.substr(1, 2);
+            _current_word = _current_word.substr(1, 2);
             return token;
         }
     }
-    else if (current_word == "*")
+    else if (_current_word == "*")
     {
         get_character_from_stream(c);
-        current_word += *c;
-        if (current_word == "*/")
+        _current_word += *c;
+        if (_current_word == "*/")
         {
-            TOKEN_NAMES name = COMMENT_CLOSE;
-            token.token_name = name;
-            token.line_number = current_lexer_line;
-            current_word = "";
-            return token;
+            _current_word = "";
+            _comment_depth--;
+            return get_token();
         }
         else
         {
-            throw string("Hasnt been handled");
+            throw string("Hasnt been handled, current word is " + _current_word);
         }
         
     }
-    else if (current_word == "\n")
+
+    if (_comment_depth < 0)
     {
-        TOKEN_NAMES name = NEW_LINE;
-        token.token_name = name;
-        token.line_number = current_lexer_line;
-        current_word = "";
-        current_lexer_line +=1;
-        return token;
+        throw string("something has gone wrong, comment count negative");
     }
-    else if (current_word == " ")
+    else if (_comment_depth < 1)
     {
-        TOKEN_NAMES name = SPACE;
-        token.token_name = name;
-        token.line_number = current_lexer_line;
-        current_word = "";
-        return token;
+        /* We don't give a shit about theese guys */
+        if (_current_word == "\n")
+        {
+            _current_word = "";
+            current_lexer_line +=1;
+            return get_token();
+        }
+        if (_current_word == "\r")
+        {
+            _current_word = "";
+            return get_token();
+        }
+        if (_current_word == "\t")
+        {
+            _current_word = "";
+            return get_token();
+        }
+        else if (_current_word == " ")
+        {
+            _current_word = "";
+            return get_token();
+        }
+        else
+        {
+            /* Ok we need to get the full word... or until a bracket or something */
+            int _watch = 0;
+            while (1)
+            {
+                get_character_from_stream(c);
+                if (*c == 0)
+                {
+                    throw string("Probable missing a space, current word is " + _current_word);
+                }
+                if (_end_of_token(c))
+                {
+                    break;
+                }
+                _current_word += *c;
+                _watch++;
+                if (_watch > 1000)
+                {
+                    throw string("got stuck in loop");
+                }
+            }
+            Symbol* sym = new Symbol;
+            if (_current_word.length() > 32)
+            {
+                throw string("String lengths cant be longer than 32 ");
+            }
+            strncpy((*sym).symbol_name, _current_word.c_str(), _current_word.length());
+            TOKEN_NAMES name = ID;
+            token.token_name = name;
+            token.line_number = current_lexer_line;
+            token.symbol = sym;
+
+            _current_word = *c;
+
+            return token;
+
+        }
+        
+        throw string("I have no idea what this token is, " + _current_word);
     }
-    else /* Ok so we need to look into the symbol table for this one */
+    else
     {
-        while (1)
-        {
-            get_character_from_stream(c);
-            if (*c == 0)
-            {
-                throw string("Probable missing a space, current word is " + current_word);
-            }
-            if ((strcmp(c,"\n") == 0) || (strcmp(c," ") == 0) || (strcmp(c,"\r") == 0))
-            {
-                break;
-            }
-            current_word += *c;
-        }
-
-        /* So we have some sort of ID... if it doesnt exist in the symbol table return NULL for the attribute val */
-        TOKEN_NAMES name = ID;
-        token.token_name = name;
-
-        /* I could throw an error here but if we are in comment mode we dont care if this is null */
-        token.line_number = current_lexer_line;
-
-        Symbol* symbol = NULL;
-        search_symbols(symbol, current_word.c_str());
-
-        if (!symbol && !(single_line_comment_mode || long_comment_mode))
-        {
-            throw string(current_word + " has not been declared in line current_lexer_line");
-        }
-        token.attribute_value = symbol;
-        current_word = *c;
-        return token;
+        /* We're in a comment, just get the next symbol when possible */
+        _current_word = "";
+        return get_token();
     }
 
 }
@@ -194,44 +205,11 @@ bool Parser::lexical_analysis()
     {
         do
         {
-            next_token = get_token_name();
-            /* Handle Comments */
-            if (single_line_comment_mode == true)
-            {
-                /* here were only looking for a new line */
-                if (next_token.token_name == NEW_LINE)
-                {
-                    single_line_comment_mode = false;
-                }
-                continue;
-            }
-            else if (long_comment_mode == true)
-            {
-                /* here were only looking for an end comment */
-                if (next_token.token_name == COMMENT_CLOSE)
-                {
-                    long_comment_mode = false;
-                }
-                continue;
-            }
-            if (next_token.token_name== COMMENT_OPEN)
-            {
-                long_comment_mode = true;
-                continue;
-            }
-            if (next_token.token_name == COMMENT_SINGLE_LINE)
-            {
-                single_line_comment_mode = true;
-                continue;
-            }
-            if (next_token.token_name == SPACE)
-            {
-                continue;
-            }
-            _tokens[_token_count++] = next_token;
+            next_token = get_token();
 
+            cout << next_token.token_name << endl;
 
-            throw string("Token with name " + to_string(next_token.token_name) + " was not identified by lexer");
+            //throw string("Token with name " + to_string(next_token.token_name) + " was not identified by lexer");
         }
         while(next_token.token_name != END_OF_FILE);
         _logger->info("Lexical Analysis Finished");
@@ -251,15 +229,33 @@ bool Parser::lexical_analysis()
     return 0;
 }
 
-void Parser::search_symbols(Symbol* symbol, const char* symbol_string)
+bool Parser::_end_of_token(char* character)
 {
-    for (int index = 0; index < _symbol_count; index++)
-    {
-        if (strcmp(_symbols[index].symbol_name, symbol_string) == 0)
-        {
-            symbol = &_symbols[index];
-            return;
-        }
-    }
-    symbol = NULL;
-}
+    return ((strcmp(c," ") == 0) 
+    || (strcmp(c,"+") == 0) 
+    || (strcmp(c,"-") == 0) 
+    || (strcmp(c,"=") == 0) 
+    || (strcmp(c,"[") == 0) 
+    || (strcmp(c,"(") == 0) 
+    || (strcmp(c,":") == 0) 
+    || (strcmp(c,";") == 0) 
+    || (strcmp(c,"<") == 0) 
+    || (strcmp(c,">") == 0)
+    || (strcmp(c,"\r") == 0)
+    || (strcmp(c,"\n") == 0)
+    || (strcmp(c,"\t") == 0)
+    );
+};
+
+// void Parser::search_symbols(Symbol* symbol, const char* symbol_string)
+// {
+//     for (int index = 0; index < _symbol_count; index++)
+//     {
+//         if (strcmp(_symbols[index].symbol_name, symbol_string) == 0)
+//         {
+//             symbol = &_symbols[index];
+//             return;
+//         }
+//     }
+//     symbol = NULL;
+// }
