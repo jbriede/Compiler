@@ -22,6 +22,27 @@ enum TOKEN_NAMES
 {
     ID,
     END_OF_FILE,
-    DIVISION
+    PLUS,
+    MINUS,
+    DIVIDE,
+    MULTIPLY,
+    EQUALS,
+    OPEN_BRACKET,
+    CLOSE_BRACKET,
+    OPEN_PARENTHESIS,
+    CLOSE_PARENTHESIS,
+    COLON,
+    SEMI_COLON,
+    LESS_THAN,
+    GREATER_THAN,
+    PROGRAM,
+    IS,
+    GLOBAL,
+    INTEGER,
+    PROCEDURE,
+    END,
+    BEGIN,
+    IF,
+    FOR
 };
 #endif 

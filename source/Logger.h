@@ -27,6 +27,9 @@ public:
     void info(string message);
     void warn(string message);
     void error(string message);
+
+    void user_error(string message);
+    void user_warn(string message);
 private:
     int _log_level;
 };

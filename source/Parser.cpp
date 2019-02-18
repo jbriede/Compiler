@@ -19,20 +19,23 @@ Parser::~Parser()
 
 bool Parser::Parse()
 {
-    Token next_token;
     try 
     {
-        do
+        while(true)
         {
-            next_token = _lexer->get_token();
-
+            Token next_token = _lexer->get_token();
             cout << next_token.token_name << endl;
-            cout << next_token.symbol->symbol_name << endl;
-
-            //throw string("Token with name " + to_string(next_token.token_name) + " was not identified by lexer");
+            if (next_token.token_name == ID)
+            {
+                cout << next_token.symbol->symbol_name << endl;
+            }
+            cout << endl;
+            delete next_token.symbol;
+            if (next_token.token_name == END_OF_FILE)
+            {
+                break;
+            }
         }
-        while(next_token.token_name != END_OF_FILE);
-        _logger->info("Lexical Analysis Finished");
     }
     catch (string e)
     {

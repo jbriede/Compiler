@@ -21,6 +21,7 @@ private:
     Logger* _logger;
     ifstream _character_stream;
     void _get_character_from_stream(char* character);
+    void _peek_character_from_stream(char* character);
     string _current_word;
     int _current_lexer_line;
     char* c;

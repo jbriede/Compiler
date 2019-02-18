@@ -47,3 +47,13 @@ void Logger::error(string message)
     /* We always do this one */
     cout << "\n\n *** Error: " << message << endl << endl << endl;
 }
+
+void Logger::user_warn(string message)
+{
+    cout << "Warning: " << message << endl;
+}
+void Logger::user_error(string message)
+{
+    /* We always do this one */
+    cout << "\n\n *** Error: " << message << endl << endl << endl;
+}
