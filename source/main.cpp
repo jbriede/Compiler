@@ -5,8 +5,9 @@
 
 
 #include <iostream>
-#include "Logger.h"
 #include "Parser.h"
+#include "Lexer.h"
+#include "SymbolTable.h"
 
 void parse_input(int argc, const char * argv[], string &file_name)
 {
@@ -46,18 +47,24 @@ int main(int argc, const char * argv[])
         return -1;
     }
 
-    Parser* parser = new Parser(logger);
-    if (!parser->load_file(file_name))
+    SymbolTable* symbol_table = new SymbolTable(logger);
+    Lexer* lexer = new Lexer(logger);
+
+    if (!lexer->load_file(file_name))
     {
         return -1;
     }
 
-    if (!parser->lexical_analysis())
+    Parser* parser = new Parser(logger, lexer);
+    if (!parser->Parse())
     {
         return -1;
     }
     
+
+    delete lexer;
     delete parser;
     delete logger;
+    delete symbol_table;
     return 0;
 }
