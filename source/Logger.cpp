@@ -55,5 +55,5 @@ void Logger::user_warn(string message)
 void Logger::user_error(string message)
 {
     /* We always do this one */
-    cout << "\n\n *** Error: " << message << endl << endl << endl;
+    cout << "\n\n *** Error with source: " << message << endl << endl << endl;
 }

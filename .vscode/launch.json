@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/j_d",
-            "args": ["test1.src"],
+            "args": ["test2.src"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

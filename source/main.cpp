@@ -48,18 +48,15 @@ int main(int argc, const char * argv[])
     }
 
     SymbolTable* symbol_table = new SymbolTable(logger);
-    Lexer* lexer = new Lexer(logger);
+    Lexer* lexer = new Lexer(logger, symbol_table);
 
     if (!lexer->load_file(file_name))
     {
         return -1;
     }
 
-    Parser* parser = new Parser(logger, lexer);
-    if (!parser->Parse())
-    {
-        return -1;
-    }
+    Parser* parser = new Parser(logger, lexer, symbol_table);
+    parser->Parse(NULL, NULL);
     
 
     delete lexer;

@@ -5,16 +5,13 @@
 #include "Lexer.h"
 
 
-Lexer::Lexer(Logger* logger)
+Lexer::Lexer(Logger* logger, SymbolTable* symbolTable)
 {
     _logger = logger;
+    _symboTable = symbolTable;
     _current_word = "";
     _current_lexer_line = 1;
     c = new char();
-    // _symbols = new Symbol[SYMBOL_TABLE_SIZE];
-    // _tokens = new Token[TOKEN_ARRAY_MAX_SIZE];
-    // _symbol_count = 0;
-    // _token_count = 0;
     _comment_depth = 0;
 }
 
@@ -78,10 +75,11 @@ void Lexer::_peek_character_from_stream(char* character)
     (*character) = _character_stream.peek();
 }
 
-Token Lexer::get_token()
+
+Token* Lexer::get_token()
 {
-    Token token;
-    token.symbol = NULL;
+    Token* token = new Token;
+    token->symbol = NULL;
     if (_current_word == "")
     {
         _get_character_from_stream(c);
@@ -110,9 +108,7 @@ Token Lexer::get_token()
             _comment_depth--;
             return get_token();
         }
-        
     }
-
     if (_comment_depth < 0)
     {
         throw string("something has gone wrong, comment count negative");
@@ -144,85 +140,92 @@ Token Lexer::get_token()
         /* Lets do some symbols */
         else if (_current_word == "+")
         {
-            token.token_name = PLUS;
-            token.line_number = _current_lexer_line;
+            token->token_name = PLUS;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == "-")
         {
-            token.token_name = MINUS;
-            token.line_number = _current_lexer_line;
+            token->token_name = MINUS;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == "=")
         {
-            token.token_name = EQUALS;
-            token.line_number = _current_lexer_line;
+            token->token_name = EQUALS;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == "[")
         {
-            token.token_name = OPEN_BRACKET;
-            token.line_number = _current_lexer_line;
+            token->token_name = OPEN_BRACKET;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == "]")
         {
-            token.token_name = CLOSE_BRACKET;
-            token.line_number = _current_lexer_line;
+            token->token_name = CLOSE_BRACKET;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == "(")
         {
-            token.token_name = OPEN_PARENTHESIS;
-            token.line_number = _current_lexer_line;
+            token->token_name = OPEN_PARENTHESIS;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == ")")
         {
-            token.token_name = CLOSE_PARENTHESIS;
-            token.line_number = _current_lexer_line;
+            token->token_name = CLOSE_PARENTHESIS;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == ":")
         {
-            token.token_name = COLON;
-            token.line_number = _current_lexer_line;
+            token->token_name = COLON;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == ";")
         {
-            token.token_name = SEMI_COLON;
-            token.line_number = _current_lexer_line;
+            token->token_name = SEMI_COLON;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == "<")
         {
-            token.token_name = LESS_THAN;
-            token.line_number = _current_lexer_line;
+            token->token_name = LESS_THAN;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == ">")
         {
-            token.token_name = GREATER_THAN;
-            token.line_number = _current_lexer_line;
+            token->token_name = GREATER_THAN;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
         else if (_current_word == ">")
         {
-            token.token_name = GREATER_THAN;
-            token.line_number = _current_lexer_line;
+            token->token_name = GREATER_THAN;
+            token->line_number = _current_lexer_line;
+            _current_word = "";
+            return token;
+        }
+        else if (_current_word == ".")
+        {
+            token->token_name = END_DOT;
+            token->line_number = _current_lexer_line;
             _current_word = "";
             return token;
         }
@@ -234,9 +237,12 @@ Token Lexer::get_token()
             while (1)
             {
                 _peek_character_from_stream(c);
-                if (*c == 0)
+                if ((strcmp(c,"\0") == 0))
                 {
-                    throw string("Probable missing a space, current word is " + _current_word);
+                    token->token_name = END_OF_FILE;
+                    token->line_number = _current_lexer_line;
+                    _current_word = "";
+                    return token;
                 }
                 if (_end_of_token(c))
                 {
@@ -257,57 +263,57 @@ Token Lexer::get_token()
             /* Now lets determine if we have a key word or an ID */
             if (_current_word == "program")
             {
-                token.token_name = PROGRAM;
-                token.line_number = _current_lexer_line;
+                token->token_name = PROGRAM;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "is")
             {
-                token.token_name = IS;
-                token.line_number = _current_lexer_line;
+                token->token_name = IS;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "global")
             {
-                token.token_name = GLOBAL;
-                token.line_number = _current_lexer_line;
+                token->token_name = GLOBAL;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "integer")
             {
-                token.token_name = INTEGER;
-                token.line_number = _current_lexer_line;
+                token->token_name = INTEGER;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "end")
             {
-                token.token_name = END;
-                token.line_number = _current_lexer_line;
+                token->token_name = END;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "begin")
             {
-                token.token_name = BEGIN;
-                token.line_number = _current_lexer_line;
+                token->token_name = BEGIN;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "if")
             {
-                token.token_name = IF;
-                token.line_number = _current_lexer_line;
+                token->token_name = IF;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
             else if (_current_word == "for")
             {
-                token.token_name = FOR;
-                token.line_number = _current_lexer_line;
+                token->token_name = FOR;
+                token->line_number = _current_lexer_line;
                 _current_word = "";
                 return token;
             }
@@ -322,15 +328,22 @@ Token Lexer::get_token()
             memset ((*sym).symbol_name,'\0',32); /* shouldnt be necesary but it is ?? */
             strncpy((*sym).symbol_name, _current_word.c_str(), _current_word.length());
             TOKEN_NAMES name = ID;
-            token.token_name = name;
-            token.line_number = _current_lexer_line;
-            token.symbol = sym;
+            token->token_name = name;
+            token->line_number = _current_lexer_line;
+            token->symbol = sym;
             _current_word = "";
+
+            //_symboTable->add_symbol(sym);
+
             return token;
         }
     }
     else
     {
+        if (_current_word == "\n")
+        {
+            _current_lexer_line +=1;
+        }
         /* We're in a comment, just get the next symbol when possible */
         _current_word = "";
         return get_token();
@@ -354,5 +367,6 @@ bool Lexer::_end_of_token(char* character)
     || (strcmp(c,"\r") == 0)
     || (strcmp(c,"\n") == 0)
     || (strcmp(c,"\t") == 0)
+    || (strcmp(c,".") == 0)
     );
 };
