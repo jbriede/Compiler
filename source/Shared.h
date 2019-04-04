@@ -20,40 +20,7 @@ struct Symbol
 
 };
 
-struct Token {
-    uint16_t token_name;
-    Symbol* symbol;
-    uint16_t line_number;
-};
 
-enum TOKEN_NAMES
-{
-    ID,
-    END_OF_FILE,
-    PLUS,
-    MINUS,
-    DIVIDE,
-    MULTIPLY,
-    EQUALS,
-    OPEN_BRACKET,
-    CLOSE_BRACKET,
-    OPEN_PARENTHESIS,
-    CLOSE_PARENTHESIS,
-    COLON,
-    SEMI_COLON,
-    LESS_THAN,
-    GREATER_THAN,
-    PROGRAM,
-    IS,
-    GLOBAL,
-    INTEGER,
-    PROCEDURE,
-    END,//20
-    BEGIN,
-    IF,
-    FOR,
-    END_DOT
-};
 
 #define PROGRAM_ERROR 0;
 #define USER_ERROR 1;

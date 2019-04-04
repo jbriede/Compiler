@@ -7,6 +7,9 @@
 #include <iostream>
 #include "Parser.h"
 #include "Lexer.h"
+#include "Token.h"
+#include "Integer.h"
+#include "FloatingPoint.h"
 #include "SymbolTable.h"
 
 void parse_input(int argc, const char * argv[], string &file_name)
@@ -47,21 +50,13 @@ int main(int argc, const char * argv[])
         return -1;
     }
 
-    SymbolTable* symbol_table = new SymbolTable(logger);
-    Lexer* lexer = new Lexer(logger, symbol_table);
-
-    if (!lexer->load_file(file_name))
+    Lexer* lex = new Lexer(logger, NULL);
+    lex->load_file(file_name);
+    while(true)
     {
-        return -1;
+        Token* token = lex->get_token();
+        logger->error("blah");
     }
 
-    Parser* parser = new Parser(logger, lexer, symbol_table);
-    parser->Parse(NULL, NULL);
-    
-
-    delete lexer;
-    delete parser;
-    delete logger;
-    delete symbol_table;
     return 0;
 }

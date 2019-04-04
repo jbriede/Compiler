@@ -4,6 +4,10 @@
 
 #include "Shared.h"
 #include "SymbolTable.h"
+#include "Token.h"
+#include "Integer.h"
+#include "FloatingPoint.h"
+#include "Word.h"
 
 #ifndef Lexer_h
 #define Lexer_h

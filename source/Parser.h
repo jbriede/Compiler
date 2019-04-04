@@ -14,7 +14,7 @@ public:
     Parser(Logger* logger, Lexer* lexer, SymbolTable* symbolTable);
     ~Parser();
     bool load_file(string file_name);
-    Token* Parse(Token* start_sybmol, Token* current_token);
+    //Token* Parse(Token* start_sybmol, Token* current_token);
     
 private:
     Logger* _logger;

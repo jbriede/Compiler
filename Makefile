@@ -7,7 +7,7 @@ $(shell mkdir -p build)
 compiler: main.o logger.o parser.o lexer.o symboltable.o Makefile
 	g++ -o build/j build/main.o build/logger.o build/parser.o build/lexer.o build/symboltable.o 
 
-main.o: source/main.cpp source/Shared.h source/Parser.h source/Lexer.h source/SymbolTable.h
+main.o: source/main.cpp source/Shared.h source/Parser.h source/Lexer.h source/SymbolTable.h source/Token.h
 	g++ -c source/main.cpp -o build/main.o
 
 parser.o: source/Parser.cpp source/Parser.h 
@@ -23,10 +23,10 @@ symboltable.o: source/SymbolTable.cpp source/SymbolTable.h
 	g++ -c source/SymbolTable.cpp -o build/symboltable.o
 
 
-debug: main_d.o logger_d.o parser_d.o lexer_d.o symboltable_d.o Makefile
+debug: main_d.o logger_d.o parser_d.o lexer_d.o symboltable_d.o  Makefile
 	g++ -o build/j_d build/main_d.o build/logger_d.o build/parser_d.o build/lexer_d.o build/symboltable_d.o -g
 
-main_d.o: source/main.cpp source/Shared.h source/Parser.h source/Lexer.h source/SymbolTable.h
+main_d.o: source/main.cpp source/Shared.h source/Parser.h source/Lexer.h source/SymbolTable.h source/Token.h
 	g++ -c source/main.cpp -o build/main_d.o -g
 
 parser_d.o: source/Parser.cpp source/Parser.h source/Logger.h
