@@ -18,7 +18,7 @@ Parser::~Parser()
 }
 
 
-void Parser::Parse(Token* start_sybmol, Token* current_token)
+Token* Parser::Parse(Token* start_sybmol, Token* current_token)
 {
 
     Token* next_token = NULL;
@@ -36,17 +36,17 @@ void Parser::Parse(Token* start_sybmol, Token* current_token)
         {
             _logger->user_error(string(e.message));
         }
-        return;
+        return NULL;
     }
     catch (string e)
     {
         _logger->error(e);
-        return;
+        return NULL;
     }
     catch(std::exception& e) {
         _logger->error("unknown error");
         _logger->error(e.what());
-        return;
+        return NULL;
     }
 
     // Wrap everything in a try catch block now and worry about how try/catch is actually supposed to work later
@@ -79,7 +79,7 @@ void Parser::Parse(Token* start_sybmol, Token* current_token)
                 // If id is next keep parsing
                 if (next_token->token_name == ID)
                 {
-                    Parse(start_sybmol, next_token);
+                    return Parse(next_token, next_token);
                 }
                 // If end is next keep parsing
                 else if (current_token->token_name == END_DOT)
@@ -95,36 +95,13 @@ void Parser::Parse(Token* start_sybmol, Token* current_token)
                     throw compiler_exception;
                 }
             }
-            else if (current_token->token_name == ID)
-            {
-                // Do something with symbol table entry... Maybe
-                
-                // Make sure next symbol is is
-                if (next_token->token_name == IS)
-                {
-                    return Parse(start_sybmol, next_token);
-                }
-                else
-                {
-                    COMPILER_EXCEPTION compiler_exception;
-                    compiler_exception.type = USER_ERROR;
-                    
-                    strcpy(compiler_exception.message, string("Expected Keyword is in line" + to_string(current_token->line_number)).c_str());
-                    throw compiler_exception;
-                }
-
-            }
-            else if (current_token->token_name == IS)
-            {
-                return Parse(next_token, next_token);
-            }
             else if (current_token->token_name == END_DOT)
             {
                 // Make sure next is end of file
                 if (next_token->token_name == END_OF_FILE)
                 {
                     // DONE!
-                    return;
+                    return NULL;
                 }
                 else
                 {
@@ -153,45 +130,15 @@ void Parser::Parse(Token* start_sybmol, Token* current_token)
                 // Next symbol needs to be a variable type
                 if (next_token->token_name == INTEGER)
                 {
-                    Parse(start_sybmol, next_token);
+                    Token* return_token = Parse(next_token, next_token);
+                    // Make global
+                    return NULL;
                 }
                 else
                 {
                     COMPILER_EXCEPTION compiler_exception;
                     compiler_exception.type = USER_ERROR;
                     strcpy(compiler_exception.message, string("Expected an INTEGER or something in line" + to_string(current_token->line_number)).c_str());
-                    throw compiler_exception;
-                }
-            }
-            else if (current_token->token_name == INTEGER)
-            {
-                // Next symbol needs to be a variable type
-                if (next_token->token_name == ID)
-                {
-                    // Since this is global we need to promote the symbol to the global scope. 
-                    //_symbolTable->make_last_symbol_global();
-                    return Parse(start_sybmol, next_token);
-                }
-                else
-                {
-                    COMPILER_EXCEPTION compiler_exception;
-                    compiler_exception.type = USER_ERROR;
-                    strcpy(compiler_exception.message, string("Expected an ID in line" + to_string(current_token->line_number)).c_str());
-                    throw compiler_exception;
-                }
-
-            }
-            else if (current_token->token_name == ID)
-            {
-                if (next_token->token_name == SEMI_COLON)
-                {
-                    return;
-                }
-                else
-                {
-                    COMPILER_EXCEPTION compiler_exception;
-                    compiler_exception.type = USER_ERROR;
-                    strcpy(compiler_exception.message, string("Expected ';' in line" + to_string(current_token->line_number)).c_str());
                     throw compiler_exception;
                 }
             }
@@ -203,6 +150,68 @@ void Parser::Parse(Token* start_sybmol, Token* current_token)
                 throw compiler_exception;
             }
             
+        }
+
+        else if (start_sybmol->token_name == ID)
+        {
+            if (current_token->token_name == ID)
+            {
+                if (next_token->token_name == SEMI_COLON)
+                {
+                    /* were instantiating */
+                    return current_token;
+                }
+                else if (next_token->token_name == IS)
+                {
+                    return Parse(next_token, next_token);
+                }
+                else
+                {
+                    COMPILER_EXCEPTION compiler_exception;
+                    compiler_exception.type = PROGRAM_ERROR;
+                    strcpy(compiler_exception.message, string("Not implemented yet").c_str());
+                    throw compiler_exception;
+                }
+            }
+            else
+            {
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = PROGRAM_ERROR;
+                strcpy(compiler_exception.message, string("Not implemented yet").c_str());
+                throw compiler_exception;
+            }
+            
+        }
+        else if (current_token->token_name == IS)
+        {
+            // Everything that follows is the program... so what to do...
+            return Parse(next_token, next_token);
+        }
+        else if (start_sybmol->token_name == INTEGER)
+        {
+            if (current_token->token_name == INTEGER)
+            {
+                if (next_token->token_name == ID)
+                {
+                    Token* token_to_add = Parse(next_token, next_token);
+                    // Add token...
+                    return NULL;
+                }
+                else
+                {
+                    COMPILER_EXCEPTION compiler_exception;
+                    compiler_exception.type = PROGRAM_ERROR;
+                    strcpy(compiler_exception.message, string("Not implemented yet").c_str());
+                    throw compiler_exception;
+                }
+            }
+            else
+            {
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = PROGRAM_ERROR;
+                strcpy(compiler_exception.message, string("Not implemented yet").c_str());
+                throw compiler_exception;
+            }
         }
 
         else
@@ -224,17 +233,17 @@ void Parser::Parse(Token* start_sybmol, Token* current_token)
         {
             _logger->user_error(string(e.message));
         }
-        return;
+        return NULL;
     }
     catch (string e)
     {
         _logger->error(e);
-        return;
+        return NULL;
     }
     catch(std::exception& e) {
         _logger->error("unknown error");
         _logger->error(e.what());
-        return;
+        return NULL;
     }
 
 }
