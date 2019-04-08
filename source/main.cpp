@@ -9,6 +9,9 @@
 #include "Lexer.h"
 #include "Token.h"
 #include "Integer.h"
+#include "Unary.h"
+#include "Arithmetic.h"
+#include "Integer.h"
 #include "FloatingPoint.h"
 #include "SymbolTable.h"
 
@@ -55,7 +58,22 @@ int main(int argc, const char * argv[])
     while(true)
     {
         Token* token = lex->get_token();
-        logger->error("blah");
+        
+        if (token->get_type() == FLOAT_VAL)
+        {
+            FloatingPoint* fp = reinterpret_cast<FloatingPoint*>(token);
+            logger->error("blah");
+        }
+        else if (token->get_type() == INT_VAL)
+        {
+            Integer* i = reinterpret_cast<Integer*>(token);
+            logger->error("blah");
+        }
+        else
+        {
+            logger->error("blah");
+        }
+        
     }
 
     return 0;

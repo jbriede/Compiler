@@ -30,7 +30,7 @@ private:
     void _peek_character_from_stream(char* character);
     string _current_word;
     int _current_lexer_line;
-    char* c;
+    char* _c;
     int _comment_depth;
     bool _end_of_token(char* character);
 

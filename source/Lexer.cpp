@@ -11,14 +11,14 @@ Lexer::Lexer(Logger* logger, SymbolTable* symbolTable)
     _symboTable = symbolTable;
     _current_word = "";
     _current_lexer_line = 1;
-    c = new char();
+    _c = new char();
     _comment_depth = 0;
 }
 
 Lexer::~Lexer()
 {
     _character_stream.close();
-    delete c;
+    delete _c;
 }
 
 bool Lexer::load_file(string file_name)
@@ -32,14 +32,32 @@ bool Lexer::load_file(string file_name)
 
         if ((last_dot_location == -1) || (file_extension != string("src")))
         {
-            throw string("Wrong file extension");
+            COMPILER_EXCEPTION compiler_exception;
+            compiler_exception.type = USER_ERROR;
+            strcpy(compiler_exception.message, string("Expected file of type src").c_str());
+            throw compiler_exception;
         }
 
         _character_stream.open(file_name.c_str());
         if (!_character_stream.good())
         {
-            throw string("File does not exist");
+            COMPILER_EXCEPTION compiler_exception;
+            compiler_exception.type = USER_ERROR;
+            strcpy(compiler_exception.message, string("File does not exist").c_str());
+            throw compiler_exception;
         }
+    }
+    catch(COMPILER_EXCEPTION e) 
+    {
+        if (e.type == 0)
+        {
+            _logger->error(string(e.message));
+        }
+        else if (e.type == 1)
+        {
+            _logger->user_error(string(e.message));
+        }
+        return false;
     }
     catch (string e)
     {
@@ -78,21 +96,19 @@ void Lexer::_peek_character_from_stream(char* character)
 
 Token* Lexer::get_token()
 {
-    //Token* token = new Token;
-    //token->symbol = NULL;
     if (_current_word == "")
     {
-        _get_character_from_stream(c);
-        _current_word += *c;
+        _get_character_from_stream(_c);
+        _current_word += *_c;
     }
 
     /* Handle Comment stuff*/
     if (_current_word == "/")
     {
-        _peek_character_from_stream(c);
-        if (strcmp(c,"*") == 0)
+        _peek_character_from_stream(_c);
+        if (strcmp(_c,"*") == 0)
         {
-            _get_character_from_stream(c);
+            _get_character_from_stream(_c);
             _current_word = "";
             _comment_depth++;
             return get_token();
@@ -100,10 +116,10 @@ Token* Lexer::get_token()
     }
     else if (_current_word == "*")
     {
-        _peek_character_from_stream(c);
-        if (strcmp(c,"/") == 0)
+        _peek_character_from_stream(_c);
+        if (strcmp(_c,"/") == 0)
         {
-            _get_character_from_stream(c);
+            _get_character_from_stream(_c);
             _current_word = "";
             _comment_depth--;
             return get_token();
@@ -141,151 +157,222 @@ Token* Lexer::get_token()
         else if (_current_word == "+")
         {
             _current_word = "";
-            return new Word("+", PLUS, _current_lexer_line);
+            return new Token(PLUS, _current_lexer_line);
         }
         else if (_current_word == "-")
         {
             _current_word = "";
-            return new Word("-", MINUS, _current_lexer_line);
+            return new Token(MINUS, _current_lexer_line);
         }
         else if (_current_word == "=")
         {
             _current_word = "";
-            return new Word("=", EQUALS, _current_lexer_line);
+            return new Token(EQUALS, _current_lexer_line);
         }
         else if (_current_word == "[")
         {
             _current_word = "";
-            return new Word("[", OPEN_BRACKET, _current_lexer_line);
+            return new Token(OPEN_BRACKET, _current_lexer_line);
         }
         else if (_current_word == "]")
         {
             _current_word = "";
-            return new Word("]", CLOSE_BRACKET, _current_lexer_line);
+            return new Token(CLOSE_BRACKET, _current_lexer_line);
         }
         else if (_current_word == "(")
         {
             _current_word = "";
-            return new Word("(", OPEN_PARENTHESIS, _current_lexer_line);
+            return new Token(OPEN_PARENTHESIS, _current_lexer_line);
         }
         else if (_current_word == ")")
         {
             _current_word = "";
-            return new Word(")", CLOSE_PARENTHESIS, _current_lexer_line);
+            return new Token(CLOSE_PARENTHESIS, _current_lexer_line);
         }
         else if (_current_word == ":")
         {
-            _current_word = "";
-            return new Word(":", COLON, _current_lexer_line);
+            _peek_character_from_stream(_c);
+            if (strcmp(_c,"=") == 0)
+            {
+                _get_character_from_stream(_c);
+                _current_word = "";
+                return new Word(":=", COLON_EQUALS, _current_lexer_line);
+            }
+            else
+            {
+                _current_word = "";
+                return new Token(COLON, _current_lexer_line);
+            }
         }
         else if (_current_word == ";")
         {
             _current_word = "";
-            return new Word(";", SEMI_COLON, _current_lexer_line);
+            return new Token(SEMI_COLON, _current_lexer_line);
         }
         else if (_current_word == "<")
         {
+            _peek_character_from_stream(_c);
+            if (strcmp(_c,"=") == 0)
+            {
+                _get_character_from_stream(_c);
+                _current_word = "";
+                return new Word("<=", LESS_THAN_EQUALS, _current_lexer_line);
+            }
             _current_word = "";
-            return new Word("<", LESS_THAN, _current_lexer_line);
+            return new Token(LESS_THAN, _current_lexer_line);
         }
         else if (_current_word == ">")
         {
+            _peek_character_from_stream(_c);
+            if (strcmp(_c,"=") == 0)
+            {
+                _get_character_from_stream(_c);
+                _current_word = "";
+                return new Word(">=", GREATER_THAN_EQUALS, _current_lexer_line);
+            }
             _current_word = "";
-            return new Word(">", GREATER_THAN, _current_lexer_line);
+            return new Token(GREATER_THAN, _current_lexer_line);
         }
         else if (_current_word == ".")
         {
             _current_word = "";
-            return new Word(".", END_DOT, _current_lexer_line);
+            return new Token(END_DOT, _current_lexer_line);
         }
         /* Else we need to decipher words that could be grammer or ids */
         else
         {
             /* Ok we need to get the full word... or until a bracket or something */
             int watch = 0;
-            while (1)
+            if (isdigit(_current_word.c_str()[0]))
             {
-                _peek_character_from_stream(c);
-                if ((strcmp(c,"\0") == 0))
+                // this is a number
+                bool isFloat = false;
+                while(true)
                 {
-                    return new Word("\0", END_OF_FILE, _current_lexer_line);
+                    _peek_character_from_stream(_c);
+                    if (strcmp(_c,".") == 0)
+                    {
+                        _get_character_from_stream(_c);
+                        _current_word += *_c;
+                        isFloat = true;
+                    }
+                    else if (isdigit(*_c))
+                    {
+                        _get_character_from_stream(_c);
+                        _current_word += *_c;
+                    }
+                    else if (_end_of_token(_c))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        throw string ("shouldnt be here");
+                    }
+                    watch++;
+                    if (watch > 1000)
+                    {
+                        throw string("got stuck in loop");
+                    }
                 }
-                if (_end_of_token(c))
+                string temp = _current_word;
+                _current_word = "";
+                if (isFloat)
                 {
-                    break;
+                    return new FloatingPoint(stof(temp), _current_lexer_line);
                 }
-                _get_character_from_stream(c);
-                _current_word += *c;
-                watch++;
-                if (watch > 1000)
+                else
                 {
-                    throw string("got stuck in loop");
+                    return new Integer(stoi(temp), _current_lexer_line);
                 }
+                
             }
+            else
+            {
+                while (1)
+                {
+                    _peek_character_from_stream(_c);
+                    if ((strcmp(_c,"\0") == 0))
+                    {
+                        return new Token(END_OF_FILE, _current_lexer_line);
+                    }
+                    if (_end_of_token(_c))
+                    {
+                        break;
+                    }
+                    _get_character_from_stream(_c);
+                    _current_word += *_c;
+                    watch++;
+                    if (watch > 1000)
+                    {
+                        throw string("got stuck in loop");
+                    }
+                }
 
-            /* Case insensitive */
-            std::transform(_current_word.begin(), _current_word.end(), _current_word.begin(), ::tolower);
+                /* Case insensitive */
+                std::transform(_current_word.begin(), _current_word.end(), _current_word.begin(), ::tolower);
 
-            /* Now lets determine if we have a key word or an ID */
-            if (_current_word == "program")
-            {
-                _current_word = "";
-                return new Word("program", PROGRAM, _current_lexer_line);
-            }
-            else if (_current_word == "is")
-            {
-                _current_word = "";
-                return new Word("is", IS, _current_lexer_line);
-            }
-            else if (_current_word == "global")
-            {
-                _current_word = "";
-                return new Word("global", GLOBAL, _current_lexer_line);
-            }
-            else if (_current_word == "integer")
-            {
-                _current_word = "";
-                return new Word("integer", INTEGER, _current_lexer_line);
-            }
-            else if (_current_word == "end")
-            {
-                _current_word = "";
-                return new Word("end", END, _current_lexer_line);
-            }
-            else if (_current_word == "begin")
-            {
-                _current_word = "";
-                return new Word("begin", BEGIN, _current_lexer_line);
-            }
-            else if (_current_word == "if")
-            {
-                _current_word = "";
-                return new Word("if", IF, _current_lexer_line);
-            }
-            else if (_current_word == "for")
-            {
-                _current_word = "";
-                return new Word("for", FOR, _current_lexer_line);
-            }
+                /* Now lets determine if we have a key word or an ID */
+                if (_current_word == "program")
+                {
+                    _current_word = "";
+                    return new Word("program", PROGRAM, _current_lexer_line);
+                }
+                else if (_current_word == "is")
+                {
+                    _current_word = "";
+                    return new Word("is", IS, _current_lexer_line);
+                }
+                else if (_current_word == "global")
+                {
+                    _current_word = "";
+                    return new Word("global", GLOBAL, _current_lexer_line);
+                }
+                else if (_current_word == "integer")
+                {
+                    _current_word = "";
+                    return new Word("integer", INTEGER, _current_lexer_line);
+                }
+                else if (_current_word == "end")
+                {
+                    _current_word = "";
+                    return new Word("end", END, _current_lexer_line);
+                }
+                else if (_current_word == "begin")
+                {
+                    _current_word = "";
+                    return new Word("begin", BEGIN, _current_lexer_line);
+                }
+                else if (_current_word == "if")
+                {
+                    _current_word = "";
+                    return new Word("if", IF, _current_lexer_line);
+                }
+                else if (_current_word == "for")
+                {
+                    _current_word = "";
+                    return new Word("for", FOR, _current_lexer_line);
+                }
 
-            /* Ok So its probably an ID */
-            // Symbol* sym = new Symbol;
-            if (_current_word.length() > 32)
-            {
-                throw string("String lengths cant be longer than 32 ");
-            }
-            // memset ((*sym).symbol_name,'\0',32); /* shouldnt be necesary but it is ?? */
-            // strncpy((*sym).symbol_name, _current_word.c_str(), _current_word.length());
-            // TOKEN_NAMES name = ID;
-            // token->token_name = name;
-            // token->line_number = _current_lexer_line;
-            // token->symbol = sym;
-            // _current_word = "";
+                /* Ok So its probably an ID */
+                // Symbol* sym = new Symbol;
+                if (_current_word.length() > 32)
+                {
+                    throw string("String lengths cant be longer than 32 ");
+                }
+                // memset ((*sym).symbol_name,'\0',32); /* shouldnt be necesary but it is ?? */
+                // strncpy((*sym).symbol_name, _current_word.c_str(), _current_word.length());
+                // TOKEN_NAMES name = ID;
+                // token->token_name = name;
+                // token->line_number = _current_lexer_line;
+                // token->symbol = sym;
+                // _current_word = "";
 
-            //_symboTable->add_symbol(sym);
-            string temp = _current_word;
-            _current_word = "";
-            return new Word(temp, ID, _current_lexer_line);
+                //_symboTable->add_symbol(sym);
+                string temp = _current_word;
+                _current_word = "";
+                return new Word(temp, ID, _current_lexer_line);                
+            }
         }
     }
     else
@@ -298,25 +385,27 @@ Token* Lexer::get_token()
         _current_word = "";
         return get_token();
     }
-
+    throw string("why am i here");
 }
+
 
 bool Lexer::_end_of_token(char* character)
 {
-    return ((strcmp(c," ") == 0) 
-    || (strcmp(c,"+") == 0) 
-    || (strcmp(c,"-") == 0) 
-    || (strcmp(c,"=") == 0) 
-    || (strcmp(c,"[") == 0) 
-    || (strcmp(c,"(") == 0) 
-    || (strcmp(c,")") == 0)
-    || (strcmp(c,":") == 0) 
-    || (strcmp(c,";") == 0) 
-    || (strcmp(c,"<") == 0) 
-    || (strcmp(c,">") == 0)
-    || (strcmp(c,"\r") == 0)
-    || (strcmp(c,"\n") == 0)
-    || (strcmp(c,"\t") == 0)
-    || (strcmp(c,".") == 0)
+    return ((strcmp(character," ") == 0) 
+    || (strcmp(character,"+") == 0) 
+    || (strcmp(character,"-") == 0) 
+    || (strcmp(character,"=") == 0) 
+    || (strcmp(character,"[") == 0) 
+    || (strcmp(character,"]") == 0) 
+    || (strcmp(character,"(") == 0) 
+    || (strcmp(character,")") == 0)
+    || (strcmp(character,":") == 0) 
+    || (strcmp(character,";") == 0) 
+    || (strcmp(character,"<") == 0) 
+    || (strcmp(character,">") == 0)
+    || (strcmp(character,"\r") == 0)
+    || (strcmp(character,"\n") == 0)
+    || (strcmp(character,"\t") == 0)
+    || (strcmp(character,".") == 0)
     );
 };

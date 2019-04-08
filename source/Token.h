@@ -16,15 +16,15 @@ enum TOKEN_TYPE
     DIVIDE,
     MULTIPLY,
     EQUALS,
-    OPEN_BRACKET,
+    OPEN_BRACKET, //7
     CLOSE_BRACKET,
     OPEN_PARENTHESIS,
     CLOSE_PARENTHESIS,
     COLON,
-    SEMI_COLON,
+    SEMI_COLON, //12
     LESS_THAN,
     GREATER_THAN,
-    PROGRAM,
+    PROGRAM, //15
     IS,
     GLOBAL,
     INTEGER,
@@ -34,8 +34,11 @@ enum TOKEN_TYPE
     IF,
     FOR,
     END_DOT,
-    INT_VAL,
-    FLOAT_VAL
+    INT_VAL,//
+    FLOAT_VAL,
+    COLON_EQUALS,
+    LESS_THAN_EQUALS,
+    GREATER_THAN_EQUALS
 };
 
 class Token
@@ -45,6 +48,10 @@ public:
     {
         _type = type;
         _line_num = line_num;
+    }
+    int get_type()
+    {
+        return _type;
     }
 private:
     int _line_num;

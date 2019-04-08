@@ -7,6 +7,7 @@ PROGRAM grant IS
 	global integer JAKE;
 	global integer ryan[0:3];
 	global integer zach;
+	global float hi = 20.3;
 
 	begin
 		zach := zach + RYAN[2];

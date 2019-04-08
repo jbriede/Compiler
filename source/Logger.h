@@ -17,6 +17,7 @@ using namespace std;
 #define LOGGER_WARN     1
 #define LOGGER_ERROR    0
 
+
 class Logger
 {
 public:

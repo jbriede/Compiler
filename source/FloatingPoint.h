@@ -11,7 +11,7 @@ using namespace std;
 class FloatingPoint : public Token
 {
 public:
-    FloatingPoint(float value, int line_num): Token(INT_VAL, line_num)
+    FloatingPoint(float value, int line_num): Token(FLOAT_VAL, line_num)
     {
         _value = value;
     }
