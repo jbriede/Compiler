@@ -55,26 +55,8 @@ int main(int argc, const char * argv[])
 
     Lexer* lex = new Lexer(logger, NULL);
     lex->load_file(file_name);
-    while(true)
-    {
-        Token* token = lex->get_token();
-        
-        if (token->get_type() == FLOAT_VAL)
-        {
-            FloatingPoint* fp = reinterpret_cast<FloatingPoint*>(token);
-            logger->error("blah");
-        }
-        else if (token->get_type() == INT_VAL)
-        {
-            Integer* i = reinterpret_cast<Integer*>(token);
-            logger->error("blah");
-        }
-        else
-        {
-            logger->error("blah");
-        }
-        
-    }
+    Parser* parser = new Parser(logger, lex, NULL);
+    parser->program();
 
     return 0;
 }

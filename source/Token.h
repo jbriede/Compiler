@@ -38,7 +38,9 @@ enum TOKEN_TYPE
     FLOAT_VAL,
     COLON_EQUALS,
     LESS_THAN_EQUALS,
-    GREATER_THAN_EQUALS
+    GREATER_THAN_EQUALS,
+    VARIABLE,
+    BASIC
 };
 
 class Token
@@ -52,6 +54,10 @@ public:
     int get_type()
     {
         return _type;
+    }
+    int get_line()
+    {
+        return _line_num;
     }
 private:
     int _line_num;

@@ -328,10 +328,15 @@ Token* Lexer::get_token()
                     _current_word = "";
                     return new Word("global", GLOBAL, _current_lexer_line);
                 }
+                else if (_current_word == "variable")
+                {
+                    _current_word = "";
+                    return new Word("variable", VARIABLE, _current_lexer_line);
+                }
                 else if (_current_word == "integer")
                 {
                     _current_word = "";
-                    return new Word("integer", INTEGER, _current_lexer_line);
+                    return new Type("integer", INTEGER, 2, _current_lexer_line);
                 }
                 else if (_current_word == "end")
                 {

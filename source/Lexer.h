@@ -7,6 +7,7 @@
 #include "Token.h"
 #include "Integer.h"
 #include "FloatingPoint.h"
+#include "Type.h"
 #include "Word.h"
 
 #ifndef Lexer_h
