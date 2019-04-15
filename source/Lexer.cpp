@@ -336,7 +336,7 @@ Token* Lexer::get_token()
                 else if (_current_word == "integer")
                 {
                     _current_word = "";
-                    return new Type("integer", INTEGER, 2, _current_lexer_line);
+                    return new Type("integer", BASIC, 2, _current_lexer_line);
                 }
                 else if (_current_word == "end")
                 {

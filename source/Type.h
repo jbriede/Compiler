@@ -12,12 +12,18 @@ using namespace std;
 class Type : public Word
 {
 public:
-    Type(string lexeme, int type, int width, int line_num): Word(lexeme, BASIC, line_num)
+    Type(string lexeme, int token_type, int width, int line_num): Word(lexeme, token_type, line_num)
     {
         _width = width;
+        _lexeme = lexeme;
+    }
+    string get_lexeme()
+    {
+        return _lexeme;
     }
 private:
     int _width;
+    string _lexeme;
     
 };
 

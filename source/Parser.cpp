@@ -2,8 +2,6 @@
  * Logger class implementation
  */
 
-#include "Parser.h"
-
 
 Parser::Parser(Logger* logger, Lexer* lexer, SymbolTable* symbolTable)
 {
@@ -75,22 +73,125 @@ Statement* Parser::block()
 {
     match(IS);
     declarations();
+    match(BEGIN);
+    Statement* s = statements();
     return new Statement(5);
 }
 
 void Parser::declarations()
 {
-    while(_lookahead->get_type() == VARIABLE)
+    while((_lookahead->get_type() == VARIABLE) || (_lookahead->get_type() == GLOBAL) || (_lookahead->get_type() == PROCEDURE))
     {
-        // Lets do some declarations
-        match(ID);
-        match(COLON);
-        Type* t = type();
+        if (_lookahead->get_type() == GLOBAL)
+        {
+            match(GLOBAL);
+            match(VARIABLE);
+            Token* id_token = _lookahead;
+            match(ID);
+            match(COLON);
+            Type* id_type = type();
+            Id* id = new Id(reinterpret_cast<Word*>(id_token), id_type, id_token->get_line());
+            // Put in global scope
+            match(SEMI_COLON);
+        }
+        else if (_lookahead->get_type() == VARIABLE)
+        {
+            match(VARIABLE);
+            Token* id_token = _lookahead;
+            match(ID);
+            match(COLON);
+            Type* id_type = type();
+            Id* id = new Id(reinterpret_cast<Word*>(id_token), id_type, id_token->get_line());
+            // Put in scope
+            match(SEMI_COLON);
+        }
+        else if (_lookahead->get_type() == PROCEDURE)
+        {
+            match(VARIABLE);
+            Token* id_token = _lookahead;
+            match(ID);
+            match(COLON);
+            
+            Type* return_type = type();
+            Id* id = new Id(reinterpret_cast<Word*>(id_token), id_type, id_token->get_line());
+
+            match(OPEN_PARENTHESIS);
+            // Parameter stuff
+            parameters();
+
+            match(CLOSE_PARENTHESIS);
+
+
+            // Put in scope
+            match(SEMI_COLON);
+        }
     }
+}
+
+void Parser::parameters();
+{
+    while (_lookahead->get_type() != CLOSE_PARENTHESIS)
+    {
+        
+    }
+}
+
+void Parser::parameter();
+{
+
 }
 
 Type* Parser::type()
 {
+    // Do dimension stuff...
     Type* t = reinterpret_cast<Type*>(_lookahead);
+    match(BASIC);
     return t;
 }
+
+Statement* Parser::statements()
+{
+    if (_lookahead->get_type() == END)
+    {
+        return NULL;
+    }
+    //  | statement statements
+    else return new Sequence(statement(), statements());
+}
+
+Statement* Parser::statement()
+{
+    switch (_lookahead->get_type())
+    {
+        case SEMI_COLON:
+            move();
+            return NULL;
+        case IF:
+            match(IF);
+            match(OPEN_PARENTHESIS);
+            Expression* expression = boolean();
+            match(CLOSE_PARENTHESIS);
+
+    }
+}
+Expression* parser::boolean()
+{
+    Expression* expression = join();
+    while(_lookahead->get_type()  == OR)
+    {
+        Token* token = _lookahead; move(); x = new 
+    }
+}
+Expression* parser::join()
+{
+
+}
+Expression* parser::equality()
+{
+
+}
+Expression* parser::relationship()
+{
+
+}
+

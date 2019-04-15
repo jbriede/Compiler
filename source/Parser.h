@@ -5,6 +5,8 @@
 #include "SymbolTable.h"
 #include "Statement.h"
 #include "Type.h"
+#include "Id.h"
+#include "While.h"
 
 #ifndef Parser_h
 #define Parser_h
@@ -33,6 +35,8 @@ private:
     
 
     Statement* block();
+    Statement* statement();
+    Statement* statements();
 
     void declarations();
     

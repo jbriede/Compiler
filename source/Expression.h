@@ -11,14 +11,18 @@ using namespace std;
 class Expression : public Node
 {
 public:
-    Expression(Token* token, Token* op, int line): Node(line)
+    Expression(Token* token, Type* type, int line): Node(line)
     {
-        _op = op;
-        _token = token;
+        _op = token;
+        _type = type;
+    }
+    Type* get_type()
+    {
+        return _type;
     }
 private:
-    Token* _token;
     Token* _op;
+    Type* _type;
     
 };
 

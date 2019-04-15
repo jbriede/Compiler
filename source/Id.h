@@ -1,5 +1,5 @@
-#ifndef Operation_h
-#define Operation_h
+#ifndef ID_h
+#define ID_h
 
 #include <iostream>
 #include <stdio.h>
@@ -8,10 +8,10 @@
 #include "Expression.h"
 using namespace std;
 
-class Operation : public Expression
+class Id : public Expression
 {
 public:
-    Operation(Token* token, Type* op, int line): Expression(token, op, line)
+    Id(Word* id, Type* type, int line): Expression(id, type, line)
     {
 
     }
