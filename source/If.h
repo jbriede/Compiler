@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#include "Node.h"
+#include "Statement.h"
 using namespace std;
 
 class If : public Statement

@@ -160,6 +160,18 @@ Statement* Parser::statement()
             match(OPEN_PARENTHESIS);
             Expression* expression = boolean();
             match(CLOSE_PARENTHESIS);
+            match(THEN);
+            Statement* statement1 = statement();
+            if (_lookahead->get_type() != ELSE)
+            {
+                return new If(expression, statement1, _lookahead->get_line());
+            } 
+            else
+            {
+                match(ELSE);
+                Statement* statement2 = statement();
+                return new Else(expression, statement1, statement2, _lookahead->get_line());
+            }
         }
 
     }

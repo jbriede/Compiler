@@ -7,6 +7,8 @@
 #include "Logger.h"
 #include "Type.h"
 #include "Id.h"
+#include "If.h"
+#include "Else.h"
 #include "And.h"
 #include "Or.h"
 #include "Sequence.h"
