@@ -15,8 +15,15 @@ public:
     {
         _lexeme = lexeme;
     }
+    string get_lexeme()
+    {
+        return _lexeme;
+    }
 private:
     string _lexeme;
+
+    
+
     
 };
 

@@ -5,10 +5,9 @@
 #include "Lexer.h"
 
 
-Lexer::Lexer(Logger* logger, SymbolTable* symbolTable)
+Lexer::Lexer(Logger* logger)
 {
     _logger = logger;
-    _symboTable = symbolTable;
     _current_word = "";
     _current_lexer_line = 1;
     _c = new char();
@@ -342,6 +341,11 @@ Token* Lexer::get_token()
                 {
                     _current_word = "";
                     return new Word("end", END, _current_lexer_line);
+                }
+                else if (_current_word == "then")
+                {
+                    _current_word = "";
+                    return new Word("then", THEN, _current_lexer_line);
                 }
                 else if (_current_word == "begin")
                 {

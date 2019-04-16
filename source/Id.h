@@ -11,12 +11,16 @@ using namespace std;
 class Id : public Expression
 {
 public:
-    Id(Word* id, Type* type, int line): Expression(id, type, line)
+    Id (Word* id, Type* type, int line): Expression(id, type, line)
     {
-
+        _word = id;
+    }
+    Word* get_word()
+    {
+        return _word;
     }
 private:
-
+    Word* _word;
     
 };
 

@@ -2,7 +2,7 @@
  * Parser class
  */
 #include "Lexer.h"
-#include "SymbolTable.h"
+#include "ScopeVariables.h"
 #include "Statement.h"
 #include "Logger.h"
 #include "Type.h"
@@ -10,6 +10,7 @@
 #include "If.h"
 #include "Else.h"
 #include "And.h"
+#include "Expression.h"
 #include "Or.h"
 #include "Sequence.h"
 #include "Not.h"
@@ -20,25 +21,27 @@
 #include "Arithmetic.h" 
 #include "Unary.h" 
 
+
+
 #ifndef Parser_h
 #define Parser_h
-using namespace std;
+
 
 class Parser
 {
 public:
-    Parser(Logger* logger, Lexer* lexer, SymbolTable* symbolTable);
+    Parser(Logger* logger, Lexer* lexer);
     ~Parser();
     bool load_file(string file_name);
-    //Token* Parse(Token* start_sybmol, Token* current_token);
     void program();
     
 private:
     Logger* _logger;
-    SymbolTable* _symbolTable;
     Lexer* _lexer;
 
     Token* _lookahead;
+
+    ScopeVariables* current_scope;
 
     void move();
     void declarations();

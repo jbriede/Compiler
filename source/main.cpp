@@ -13,7 +13,6 @@
 #include "Arithmetic.h"
 #include "Integer.h"
 #include "FloatingPoint.h"
-#include "SymbolTable.h"
 
 void parse_input(int argc, const char * argv[], string &file_name)
 {
@@ -53,10 +52,10 @@ int main(int argc, const char * argv[])
         return -1;
     }
 
-    Lexer* lex = new Lexer(logger, NULL);
+    Lexer* lex = new Lexer(logger);
     lex->load_file(file_name);
-    Parser* parser = new Parser(logger, lex, NULL);
-    parser->program();
+    Parser* p = new Parser(logger, lex);
+    p->program();
 
     return 0;
 }

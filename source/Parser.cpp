@@ -4,11 +4,10 @@
 
 #include "Parser.h"
 
-Parser::Parser(Logger* logger, Lexer* lexer, SymbolTable* symbolTable)
+Parser::Parser(Logger* logger, Lexer* lexer)
 {
     _logger = logger;
     _lexer = lexer;
-    _symbolTable = symbolTable;
 }
 
 Parser::~Parser()
@@ -65,7 +64,16 @@ void Parser::match(int token_type)
 void Parser::program()
 {
     move();
-    match(PROGRAM); match(ID); // Do I put this in the symbol table?
+    match(PROGRAM); 
+    current_scope = new ScopeVariables(NULL);
+    Word* look_word = reinterpret_cast<Word*>(_lookahead);
+    Id* program_id = new Id(look_word, new Type(look_word->get_lexeme(), ID, look_word->get_lexeme().length(), _lookahead->get_line()),_lookahead->get_line());   
+    current_scope->add(program_id->get_word()->get_lexeme(), program_id);
+    match(ID);
+    if (current_scope->find("grant"))
+    {
+        printf("woo");
+    }
     Statement* s = block();
 
 }
@@ -237,6 +245,7 @@ Expression* Parser::relationship()
 
 
     }
+    return NULL;
 }
 
 Expression* Parser::exp()
@@ -317,8 +326,8 @@ Expression* Parser::factor()
             move();
             break;
         }
-        return expression;
     }
+    return expression;
             
 }
 

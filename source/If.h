@@ -11,7 +11,7 @@ using namespace std;
 class If : public Statement
 {
 public:
-    If (Expression* expression, Statement* statement int line): Statement(line)
+    If (Expression* expression, Statement* statement, int line): Statement(line)
     {
         _expression = expression;
         _statement = statement;

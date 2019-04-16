@@ -3,7 +3,6 @@
  */
 
 #include "Shared.h"
-#include "SymbolTable.h"
 #include "Token.h"
 #include "Integer.h"
 #include "FloatingPoint.h"
@@ -18,14 +17,13 @@ using namespace std;
 class Lexer
 {
 public:
-    Lexer(Logger* logger, SymbolTable* symbolTable);
+    Lexer(Logger* logger);
     ~Lexer();
     bool load_file(string file_name);
     Token* get_token();
     
 private:
     Logger* _logger;
-    SymbolTable* _symboTable;
     ifstream _character_stream;
     void _get_character_from_stream(char* character);
     void _peek_character_from_stream(char* character);
