@@ -353,6 +353,16 @@ Token* Lexer::get_token()
                     _current_word = "";
                     return new Word("if", IF, _current_lexer_line);
                 }
+                else if (_current_word == "true")
+                {
+                    _current_word = "";
+                    return new Word("true", TRUE, _current_lexer_line);
+                }
+                else if (_current_word == "false")
+                {
+                    _current_word = "";
+                    return new Word("false", FALSE, _current_lexer_line);
+                }
                 else if (_current_word == "for")
                 {
                     _current_word = "";

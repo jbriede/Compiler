@@ -40,7 +40,14 @@ enum TOKEN_TYPE
     LESS_THAN_EQUALS,
     GREATER_THAN_EQUALS,
     VARIABLE,
-    BASIC //31
+    BASIC, //31
+    NOTEQUALS,
+    AND,
+    OR,
+    TRUE,
+    NOT,
+    FALSE,
+    FLOAT
 };
 
 class Token

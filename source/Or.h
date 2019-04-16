@@ -11,7 +11,10 @@ using namespace std;
 class Or : public Logical
 {
 public:
-    Or(Token* token, Expression* expression1, Expression* expression2, int line): Logical(token, expression1, expression2, line);
+    Or(Token* token, Expression* expression1, Expression* expression2, int line): Logical(token, expression1, expression2, line)
+    {
+        
+    }
 private:
 
     

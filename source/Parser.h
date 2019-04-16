@@ -4,9 +4,19 @@
 #include "Lexer.h"
 #include "SymbolTable.h"
 #include "Statement.h"
+#include "Logger.h"
 #include "Type.h"
 #include "Id.h"
-#include "While.h"
+#include "And.h"
+#include "Or.h"
+#include "Sequence.h"
+#include "Not.h"
+#include "Relationship.h"
+#include "FloatingPoint.h" 
+#include "Integer.h" 
+#include "Constant.h" 
+#include "Arithmetic.h" 
+#include "Unary.h" 
 
 #ifndef Parser_h
 #define Parser_h
@@ -29,21 +39,25 @@ private:
     Token* _lookahead;
 
     void move();
+    void declarations();
 
     void match(int token_type);
 
-    
+    Type* type();
 
     Statement* block();
     Statement* statement();
     Statement* statements();
-
-    void declarations();
     
-    Type* type();
+    Expression* boolean();
 
-
-
+    Expression* join();
+    Expression* equality();
+    Expression* relationship();
+    Expression* exp();
+    Expression* term();
+    Expression* unary();
+    Expression* factor();
 
 };
 

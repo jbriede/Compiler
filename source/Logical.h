@@ -13,14 +13,14 @@ class Logical : public Expression
 public:
     Logical(Token* token, Expression* expression1, Expression* expression2, int line): Expression(token, NULL, line)
     {
-        if (!check(expression_1->get_type(), expression_2->get_type()))
+        if (!check(expression1->get_type(), expression2->get_type()))
         {
             throw string("Types dont match... also need to make this better");
         }
     }
 private:
     Type* _type;
-    bool check(Type* type_1, Type* type_1)
+    bool check(Type* type_1, Type* type_2)
     {
         return type_1->get_lexeme() == type_2->get_lexeme();
     }

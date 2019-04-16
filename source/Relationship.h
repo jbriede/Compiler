@@ -1,5 +1,5 @@
-#ifndef Or_h
-#define Or_h
+#ifndef Relationship_h
+#define Relationship_h
 
 #include <iostream>
 #include <stdio.h>
@@ -11,7 +11,10 @@ using namespace std;
 class Relationship : public Logical
 {
 public:
-    Relationship(Token* token, Expression* expression1, Expression* expression2, int line): Logical(token, expression1, expression2, line);
+    Relationship(Token* token, Expression* expression1, Expression* expression2, int line): Logical(token, expression1, expression2, line)
+    {
+        
+    }
 private:
 
     

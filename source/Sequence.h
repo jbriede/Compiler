@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#include "Node.h"
+#include "Statement.h"
 using namespace std;
 
 class Sequence : public Statement
 {
 public:
-    Sequence (Statement 1, Statement 2, int line): Node(line)
+    Sequence (Statement* s1, Statement* s2, int line): Statement(line)
     {
     }
 private:
