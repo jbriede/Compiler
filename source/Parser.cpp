@@ -65,15 +65,11 @@ void Parser::program()
 {
     move();
     match(PROGRAM); 
-    current_scope = new ScopeVariables(NULL);
+    _current_scope = new ScopeVariables(NULL);
     Word* look_word = reinterpret_cast<Word*>(_lookahead);
     Id* program_id = new Id(look_word, new Type(look_word->get_lexeme(), ID, look_word->get_lexeme().length(), _lookahead->get_line()),_lookahead->get_line());   
-    current_scope->add(program_id->get_word()->get_lexeme(), program_id);
+    _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
     match(ID);
-    if (current_scope->find("grant"))
-    {
-        printf("woo");
-    }
     Statement* s = block();
 
 }
@@ -99,8 +95,37 @@ void Parser::declarations()
             match(ID);
             match(COLON);
             Type* id_type = type();
-            Id* id = new Id(reinterpret_cast<Word*>(id_token), id_type, id_token->get_line());
+            Word* id_word =  reinterpret_cast<Word*>(id_token);
+            Id* id = new Id(id_word, id_type, id_token->get_line());
             // Put in global scope
+            try 
+            {
+                _current_scope->is_in_scope(id_word->get_lexeme());
+            }
+            catch(COMPILER_EXCEPTION e) 
+            {
+                if (e.type == 0)
+                {
+                    _logger->error(string(e.message));
+                }
+                else if (e.type == 1)
+                {
+                    _logger->user_error(string(e.message));
+                }
+                return;
+            }
+            catch (string e)
+            {
+                _logger->error(e);
+                return;
+            }
+            catch(std::exception& e) {
+                _logger->error("unknown error");
+                _logger->error(e.what());
+                return;
+            }
+
+            _current_scope->add_global(id_word->get_lexeme(), id);
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == VARIABLE)
@@ -110,8 +135,36 @@ void Parser::declarations()
             match(ID);
             match(COLON);
             Type* id_type = type();
-            Id* id = new Id(reinterpret_cast<Word*>(id_token), id_type, id_token->get_line());
+            Word* id_word =  reinterpret_cast<Word*>(id_token);
+            Id* id = new Id(id_word, id_type, id_token->get_line());
             // Put in scope
+            try 
+            {
+                _current_scope->is_in_scope(id_word->get_lexeme());
+            }
+            catch(COMPILER_EXCEPTION e) 
+            {
+                if (e.type == 0)
+                {
+                    _logger->error(string(e.message));
+                }
+                else if (e.type == 1)
+                {
+                    _logger->user_error(string(e.message));
+                }
+                return;
+            }
+            catch (string e)
+            {
+                _logger->error(e);
+                return;
+            }
+            catch(std::exception& e) {
+                _logger->error("unknown error");
+                _logger->error(e.what());
+                return;
+            }
+            _current_scope->add(id_word->get_lexeme(), id);
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == PROCEDURE)
@@ -181,6 +234,8 @@ Statement* Parser::statement()
                 return new Else(expression, statement1, statement2, _lookahead->get_line());
             }
         }
+        case ID:
+            return assign();
 
     }
     return NULL;
@@ -326,8 +381,71 @@ Expression* Parser::factor()
             move();
             break;
         }
+        case ID:
+        {
+            Word* id_word = reinterpret_cast<Word*>(_lookahead);
+            Id* id = _current_scope->find(id_word->get_lexeme());
+            move();
+            if (_lookahead->get_type() == OPEN_BRACKET)
+            {
+                throw string("under construction");
+            }
+            else
+            {
+                return id;
+            }
+            
+            break;
+        }
     }
     return expression;
             
 }
 
+Statement* Parser::assign()
+{
+    Token* token = _lookahead;
+    Id* id;
+    match(ID);
+    Word* id_word =  reinterpret_cast<Word*>(token);
+
+    try 
+    {
+        id = _current_scope->find(id_word->get_lexeme());
+    }
+    catch(COMPILER_EXCEPTION e) 
+    {
+        if (e.type == 0)
+        {
+            _logger->error(string(e.message));
+        }
+        else if (e.type == 1)
+        {
+            _logger->user_error(string(e.message));
+        }
+        return NULL;
+    }
+    catch (string e)
+    {
+        _logger->error(e);
+        return NULL;
+    }
+    catch(std::exception& e) {
+        _logger->error("unknown error");
+        _logger->error(e.what());
+        return NULL;
+    }
+
+    if (_lookahead->get_type() == COLON_EQUALS)
+    {
+        match(COLON_EQUALS);
+        Statement* statement = new Set(id, boolean(), _lookahead->get_line());
+        match(SEMI_COLON);
+    }
+    else
+    {
+        throw string("Under construction");
+    }
+    
+    
+}

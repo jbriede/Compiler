@@ -19,7 +19,8 @@
 #include "Integer.h" 
 #include "Constant.h" 
 #include "Arithmetic.h" 
-#include "Unary.h" 
+#include "Unary.h"
+#include "Set.h" 
 
 
 
@@ -41,7 +42,7 @@ private:
 
     Token* _lookahead;
 
-    ScopeVariables* current_scope;
+    ScopeVariables* _current_scope;
 
     void move();
     void declarations();
@@ -63,6 +64,7 @@ private:
     Expression* term();
     Expression* unary();
     Expression* factor();
+    Statement* assign();
 
 };
 
