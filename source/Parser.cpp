@@ -4,10 +4,11 @@
 
 #include "Parser.h"
 
-Parser::Parser(Logger* logger, Lexer* lexer)
+Parser::Parser(Logger* logger, Lexer* lexer, Writer* writer)
 {
     _logger = logger;
     _lexer = lexer;
+    _writer = writer;
 }
 
 Parser::~Parser()
@@ -304,7 +305,18 @@ Statement* Parser::statement()
             }
         }
         case ID:
+        {
             return assign();
+        }
+        case RETURN:
+        {
+            match(RETURN);
+            Expression* hmm = boolean();
+            Id* return_id = reinterpret_cast<Id*>(hmm);
+            return NULL;
+        }
+        default:
+            throw string("Not sure whats going on ");
 
     }
     return NULL;

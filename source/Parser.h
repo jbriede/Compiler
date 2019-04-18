@@ -21,6 +21,7 @@
 #include "Arithmetic.h" 
 #include "Unary.h"
 #include "Set.h" 
+#include "Writer.h" 
 
 
 
@@ -31,7 +32,7 @@
 class Parser
 {
 public:
-    Parser(Logger* logger, Lexer* lexer);
+    Parser(Logger* logger, Lexer* lexer, Writer* writer);
     ~Parser();
     bool load_file(string file_name);
     void program();
@@ -39,6 +40,7 @@ public:
 private:
     Logger* _logger;
     Lexer* _lexer;
+    Writer* _writer;
 
     Token* _lookahead;
 

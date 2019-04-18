@@ -51,7 +51,8 @@ enum TOKEN_TYPE
     THEN,
     ELSE,
     COMMA,
-    BOOL //42
+    BOOL, //42
+    RETURN
 };
 
 class Token

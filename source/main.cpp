@@ -13,6 +13,7 @@
 #include "Arithmetic.h"
 #include "Integer.h"
 #include "FloatingPoint.h"
+#include "Writer.h"
 
 void parse_input(int argc, const char * argv[], string &file_name)
 {
@@ -52,10 +53,16 @@ int main(int argc, const char * argv[])
         return -1;
     }
 
-    Lexer* lex = new Lexer(logger);
-    lex->load_file(file_name);
-    Parser* p = new Parser(logger, lex);
-    p->program();
+    Lexer* lexer = new Lexer(logger);
+    lexer->load_file(file_name);
+
+    Writer* writer = new Writer(logger, "./build/out.ll");
+
+    Parser* parser = new Parser(logger, lexer, writer);
+    parser->program();
+    delete writer;
+    delete parser;
+    delete lexer;
 
     return 0;
 }

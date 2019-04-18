@@ -396,6 +396,11 @@ Token* Lexer::get_token()
                     _current_word = "";
                     return new Word("procedure", PROCEDURE, _current_lexer_line);
                 }
+                else if (_current_word == "return")
+                {
+                    _current_word = "";
+                    return new Word("return", RETURN, _current_lexer_line);
+                }
 
                 /* Ok So its probably an ID */
                 // Symbol* sym = new Symbol;
