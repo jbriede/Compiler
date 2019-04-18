@@ -15,15 +15,16 @@
 #include "FloatingPoint.h"
 #include "Writer.h"
 
-void parse_input(int argc, const char * argv[], string &file_name)
+void parse_input(int argc, const char * argv[], string &in_file, string &out_file)
 {
 
-    if (argc != 2)
+    if (argc != 3)
     {
         throw string("Invalid number of arguments");
     }
 
-    file_name = string(argv[1]);
+    in_file = string(argv[1]);
+    out_file = string(argv[2]);
 }
 
 int main(int argc, const char * argv[])
@@ -36,10 +37,11 @@ int main(int argc, const char * argv[])
     }
     
     /* try to get info from arguments */
-    string file_name;
+    string in_file;
+    string out_file;
     try
     {
-        parse_input(argc, argv, file_name);
+        parse_input(argc, argv, in_file, out_file);
     }
     catch(string exception)
     {
@@ -54,9 +56,9 @@ int main(int argc, const char * argv[])
     }
 
     Lexer* lexer = new Lexer(logger);
-    lexer->load_file(file_name);
+    lexer->load_file(in_file);
 
-    Writer* writer = new Writer(logger, "./build/out.ll");
+    Writer* writer = new Writer(logger, out_file);
 
     Parser* parser = new Parser(logger, lexer, writer);
     parser->program();
