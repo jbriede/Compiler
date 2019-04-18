@@ -65,6 +65,8 @@ private:
     Expression* unary();
     Expression* factor();
     Statement* assign();
+    void parameters();
+    void parameter();
 
 };
 

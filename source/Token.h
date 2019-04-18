@@ -49,7 +49,9 @@ enum TOKEN_TYPE
     FALSE,
     FLOAT,
     THEN,
-    ELSE
+    ELSE,
+    COMMA,
+    BOOL //42
 };
 
 class Token

@@ -137,6 +137,10 @@ Token* Lexer::get_token()
             _current_lexer_line +=1;
             return get_token();
         }
+        if (_current_word == "\0")
+        {
+            throw string("hmm");
+        }
         if (_current_word == "\r")
         {
             _current_word = "";
@@ -172,6 +176,16 @@ Token* Lexer::get_token()
         {
             _current_word = "";
             return new Token(OPEN_BRACKET, _current_lexer_line);
+        }
+        else if (_current_word == "|")
+        {
+            _current_word = "";
+            return new Token(OR, _current_lexer_line);
+        }
+        else if (_current_word == "&")
+        {
+            _current_word = "";
+            return new Token(AND, _current_lexer_line);
         }
         else if (_current_word == "]")
         {
@@ -337,6 +351,11 @@ Token* Lexer::get_token()
                     _current_word = "";
                     return new Type("integer", BASIC, 2, _current_lexer_line);
                 }
+                else if (_current_word == "bool")
+                {
+                    _current_word = "";
+                    return new Type("bool", BASIC, 1, _current_lexer_line);
+                }
                 else if (_current_word == "end")
                 {
                     _current_word = "";
@@ -371,6 +390,11 @@ Token* Lexer::get_token()
                 {
                     _current_word = "";
                     return new Word("for", FOR, _current_lexer_line);
+                }
+                else if (_current_word == "procedure")
+                {
+                    _current_word = "";
+                    return new Word("procedure", PROCEDURE, _current_lexer_line);
                 }
 
                 /* Ok So its probably an ID */

@@ -70,17 +70,32 @@ void Parser::program()
     Id* program_id = new Id(look_word, new Type(look_word->get_lexeme(), ID, look_word->get_lexeme().length(), _lookahead->get_line()),_lookahead->get_line());   
     _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
     match(ID);
+    match(IS);
     Statement* s = block();
+    match(PROGRAM);
+    match(END_DOT);
+
 
 }
 
 Statement* Parser::block()
-{
-    match(IS);
+{   
+    ScopeVariables* saved = _current_scope;
+    _current_scope = new ScopeVariables(saved);
+    // params... if this block is for a procedure
+    if (_lookahead->get_type() == OPEN_PARENTHESIS)
+    {
+        match(OPEN_PARENTHESIS);
+        parameters();
+        match(CLOSE_PARENTHESIS);
+    }
+    
     declarations();
     match(BEGIN);
     Statement* s = statements();
-    return new Statement(5);
+    _current_scope = saved;
+    match(END);
+    return s;
 }
 
 void Parser::declarations()
@@ -169,7 +184,7 @@ void Parser::declarations()
         }
         else if (_lookahead->get_type() == PROCEDURE)
         {
-            match(VARIABLE);
+            match(PROCEDURE);
             Token* id_token = _lookahead;
             match(ID);
             match(COLON);
@@ -177,16 +192,70 @@ void Parser::declarations()
             Type* return_type = type();
             Id* id = new Id(reinterpret_cast<Word*>(id_token), return_type, id_token->get_line());
 
-            match(OPEN_PARENTHESIS);
             
-
-            match(CLOSE_PARENTHESIS);
+        
+            Statement* procedure_statement = block();
+            // Probably need to do something with this
+            match(PROCEDURE);
 
 
             // Put in scope
             match(SEMI_COLON);
         }
     }
+}
+
+void Parser::parameters()
+{
+    while (_lookahead->get_type() != CLOSE_PARENTHESIS)
+    {
+        parameter();
+        if (_lookahead->get_type() == COMMA)
+        {
+            match(COMMA);
+        }
+    }
+}
+
+void Parser::parameter()
+{
+    match(VARIABLE);
+    Token* id_token = _lookahead;
+    match(ID);
+    match(COLON);
+    Type* id_type = type();
+    Word* id_word =  reinterpret_cast<Word*>(id_token);
+    Id* id = new Id(id_word, id_type, id_token->get_line());
+    // Put in global scope
+    try 
+    {
+        _current_scope->is_in_scope(id_word->get_lexeme());
+    }
+    catch(COMPILER_EXCEPTION e) 
+    {
+        if (e.type == 0)
+        {
+            _logger->error(string(e.message));
+        }
+        else if (e.type == 1)
+        {
+            _logger->user_error(string(e.message));
+        }
+        return;
+    }
+    catch (string e)
+    {
+        _logger->error(e);
+        return;
+    }
+    catch(std::exception& e) {
+        _logger->error("unknown error");
+        _logger->error(e.what());
+        return;
+    }
+
+    _current_scope->add_global(id_word->get_lexeme(), id);
+    
 }
 
 Type* Parser::type()
@@ -441,6 +510,7 @@ Statement* Parser::assign()
         match(COLON_EQUALS);
         Statement* statement = new Set(id, boolean(), _lookahead->get_line());
         match(SEMI_COLON);
+        return statement;
     }
     else
     {
