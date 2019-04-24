@@ -15,6 +15,10 @@ public:
     {
         _value = value;
     }
+    int get_value()
+    {
+        return _value;
+    }
 private:
     int _value;
 };

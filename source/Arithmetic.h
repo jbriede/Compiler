@@ -23,7 +23,69 @@ public:
     }
     string to_string()
     {
-        return string(_expression_1->to_string() + " " + _op->to_string() + " " + _expression_2->to_string());
+
+        string opr = "";
+        switch(_op->get_type())
+        {
+            case PLUS:
+            {
+                opr = "add i32 ";
+                break;
+            }
+            case MINUS:
+            {
+                opr = "sub i32 ";
+                break;
+            }
+            default:
+            {
+                throw string("not sure what to do with this operator type");
+            }
+        }
+
+        string expr1 = "";
+        if (_expression_1->get_op()->get_type() == ID)
+        {
+            Id* id = (Id*)_expression_1;
+            expr1 = "%";
+            if (id->is_global())
+            {
+                expr1 = "@";
+            }
+            expr1 +=id->get_word()->get_lexeme();
+        }
+        else if (_expression_1->get_op()->get_type() == INT_VAL)
+        {
+            Integer* i = (Integer*)_expression_1->get_op();
+            expr1 = std::to_string(i->get_value());
+        }
+        else
+        {
+            throw string("Not sure what where doing math on");
+        }
+        
+        string expr2 = "";
+        if (_expression_2->get_op()->get_type() == ID)
+        {
+            Id* id = (Id*)_expression_2;
+            expr2 = "%";
+            if (id->is_global())
+            {
+                expr2 = "@";
+            }
+            expr2 +=id->get_word()->get_lexeme();
+        }
+        else if (_expression_2->get_op()->get_type() == INT_VAL)
+        {
+            Integer* i = (Integer*)_expression_2->get_op();
+            expr2 = std::to_string(i->get_value());
+        }
+        else
+        {
+            throw string("Not sure what where doing math on");
+        }
+        return string(opr + expr1 + " , " + expr2 + "\n");
+
     }
 private:
     Expression* _expression_1;

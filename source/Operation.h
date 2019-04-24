@@ -22,7 +22,7 @@ public:
         Expression* expression = generate();
         Temp* temp = new Temp(_type, _line);
         _writer->append_main(temp->get_name() + expression->to_string());
-        return NULL;
+        return temp;
     }
 private:
 

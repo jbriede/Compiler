@@ -20,6 +20,10 @@ public:
     {
         return _type;
     }
+    Token* get_op()
+    {
+        return _op;
+    }
     string to_string()
     {
         return _op->to_string();

@@ -66,17 +66,19 @@ void Parser::program()
 {
     move();
     match(PROGRAM); 
+    /* Make Global Scope */
     _current_scope = new ScopeVariables(NULL);
+    /* Make Program Scope */
+    _current_scope = new ScopeVariables(_current_scope);
     Word* look_word = reinterpret_cast<Word*>(_lookahead);
     Id* program_id = new Id(look_word, new Type(look_word->get_lexeme(), ID, look_word->get_lexeme().length(), _lookahead->get_line()),_lookahead->get_line());   
     _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
     match(ID);
     match(IS);
     Statement* s = block(false);
+    // s->generate(_writer);
     match(PROGRAM);
     match(END_DOT);
-
-
 }
 
 Statement* Parser::block(bool is_procedure)
@@ -110,6 +112,7 @@ void Parser::declarations()
             Type* id_type = type();
             Word* id_word =  reinterpret_cast<Word*>(id_token);
             Id* id = new Id(id_word, id_type, id_token->get_line());
+            id->set_global();
             // Put in global scope
             try 
             {
@@ -202,7 +205,7 @@ void Parser::declarations()
             {
                 width = "i32";
             }
-            _writer->append_main("@" + name + " = private " + width + "\n");
+            _writer->append_main("%" + name + " = private " + width + "\n");
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == PROCEDURE)
@@ -419,7 +422,6 @@ Expression* Parser::exp()
     {
         Token* token = _lookahead; move(); expression = new Arithmetic(token, expression, term(),  _lookahead->get_line());
         Arithmetic* temp = (Arithmetic*)expression;
-        _writer->append_main(temp->to_string());
     }
     return expression;
 }
@@ -551,6 +553,8 @@ Statement* Parser::assign()
     {
         match(COLON_EQUALS);
         Statement* statement = new Set(id, boolean(), _lookahead->get_line());
+        Set* hmm = (Set*)statement;
+        hmm->generate(_writer);
         match(SEMI_COLON);
         return statement;
     }
