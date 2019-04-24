@@ -14,7 +14,7 @@ public:
     {
         _line = line;
     }
-private:
+protected:
     int _line;
     
 };

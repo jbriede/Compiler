@@ -7,7 +7,6 @@
 #include <iostream>
 #include "Parser.h"
 #include "Lexer.h"
-#include "Token.h"
 #include "Integer.h"
 #include "Unary.h"
 #include "Arithmetic.h"

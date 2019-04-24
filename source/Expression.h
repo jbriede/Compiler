@@ -20,10 +20,18 @@ public:
     {
         return _type;
     }
+    string to_string()
+    {
+        return _op->to_string();
+    };
+    Expression* generate(){return this;};
+    Expression* reduce(){return this;}; // reuse and recycle
 private:
-    Token* _op;
-    Type* _type;
     
+    
+protected:
+    Type* _type;
+    Token* _op;
 };
 
 #endif

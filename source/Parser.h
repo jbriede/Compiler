@@ -53,7 +53,7 @@ private:
 
     Type* type();
 
-    Statement* block();
+    Statement* block(bool is_procedure);
     Statement* statement();
     Statement* statements();
     

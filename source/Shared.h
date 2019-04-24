@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <iostream>
-#include "Logger.h"
 #include <string>
 #include <fstream>
 
 #ifndef Shared_h
 #define Shared_h
 
+
+
+// int x = 5;
 enum SYMBOL_TYPES
 {
     PROGRAM_SYMBOL,

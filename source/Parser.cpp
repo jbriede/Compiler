@@ -72,30 +72,27 @@ void Parser::program()
     _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
     match(ID);
     match(IS);
-    Statement* s = block();
+    Statement* s = block(false);
     match(PROGRAM);
     match(END_DOT);
 
 
 }
 
-Statement* Parser::block()
+Statement* Parser::block(bool is_procedure)
 {   
-    ScopeVariables* saved = _current_scope;
-    _current_scope = new ScopeVariables(saved);
-    // params... if this block is for a procedure
-    if (_lookahead->get_type() == OPEN_PARENTHESIS)
+    if (!is_procedure)
     {
-        match(OPEN_PARENTHESIS);
-        parameters();
-        match(CLOSE_PARENTHESIS);
+        _writer->append_main("define i32 @main() {\n");
     }
-    
     declarations();
     match(BEGIN);
     Statement* s = statements();
-    _current_scope = saved;
     match(END);
+    if (!is_procedure)
+    {
+        _writer->append_main("}");
+    }
     return s;
 }
 
@@ -142,6 +139,19 @@ void Parser::declarations()
             }
 
             _current_scope->add_global(id_word->get_lexeme(), id);
+            string name = id_word->get_lexeme();
+
+            string width = "i8";
+            string type = "c";
+            if (id_type->get_lexeme() == "integer")
+            {
+                width = "i16";
+            }
+            else if (id_type->get_lexeme() == "float")
+            {
+                width = "i32";
+            }
+            _writer->append_global("@" + name + " = extern global " + width + "\n");
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == VARIABLE)
@@ -181,6 +191,18 @@ void Parser::declarations()
                 return;
             }
             _current_scope->add(id_word->get_lexeme(), id);
+            string name = id_word->get_lexeme();
+            string width = "i8";
+            string type = "c";
+            if (id_type->get_lexeme() == "integer")
+            {
+                width = "i16";
+            }
+            else if (id_type->get_lexeme() == "float")
+            {
+                width = "i32";
+            }
+            _writer->append_main("@" + name + " = private " + width + "\n");
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == PROCEDURE)
@@ -194,14 +216,20 @@ void Parser::declarations()
             Id* id = new Id(reinterpret_cast<Word*>(id_token), return_type, id_token->get_line());
 
             
-        
-            Statement* procedure_statement = block();
+            ScopeVariables* saved = _current_scope;
+            _current_scope = new ScopeVariables(saved);
+            match(OPEN_PARENTHESIS);
+            parameters();
+            match(CLOSE_PARENTHESIS);
+            Statement* procedure_statement = block(true);
             // Probably need to do something with this
             match(PROCEDURE);
+            
 
 
             // Put in scope
             match(SEMI_COLON);
+            _current_scope = saved;
         }
     }
 }
@@ -390,6 +418,8 @@ Expression* Parser::exp()
     while(_lookahead->get_type()  == PLUS || _lookahead->get_type()  == MINUS)
     {
         Token* token = _lookahead; move(); expression = new Arithmetic(token, expression, term(),  _lookahead->get_line());
+        Arithmetic* temp = (Arithmetic*)expression;
+        _writer->append_main(temp->to_string());
     }
     return expression;
 }

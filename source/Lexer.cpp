@@ -305,7 +305,7 @@ Token* Lexer::get_token()
                 while (1)
                 {
                     _peek_character_from_stream(_c);
-                    if ((strcmp(_c,"\0") == 0))
+                    if ((strcmp(_c,"\\0") == 0))
                     {
                         return new Token(END_OF_FILE, _current_lexer_line);
                     }
@@ -318,7 +318,9 @@ Token* Lexer::get_token()
                     watch++;
                     if (watch > 1000)
                     {
-                        throw string("got stuck in loop");
+                        // todo: FIX SOON!
+                        throw string("blahhhh");
+                        //return new Token(END_OF_FILE, _current_lexer_line);
                     }
                 }
 
