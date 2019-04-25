@@ -23,20 +23,39 @@ void Parser::move()
 
 void Parser::match(int token_type)
 {
+    if (token_type == _lookahead->get_type())
+    {
+        move();
+        return;
+    }
+    else
+    {
+        COMPILER_EXCEPTION compiler_exception;
+        compiler_exception.type = USER_ERROR;
+        strcpy(compiler_exception.message, string("Expected token " + type_as_strings[token_type] + " in line " + to_string(_lookahead->get_line())).c_str());
+        throw compiler_exception;
+    }
+}
+
+void Parser::program()
+{
     try 
     {
-        if (token_type == _lookahead->get_type())
-        {
-            move();
-            return;
-        }
-        else
-        {
-            COMPILER_EXCEPTION compiler_exception;
-            compiler_exception.type = USER_ERROR;
-            strcpy(compiler_exception.message, string("Expected token " + to_string(token_type) + " in line " + to_string(_lookahead->get_line())).c_str());
-            throw compiler_exception;
-        }
+        move();
+        match(PROGRAM); 
+        /* Make Global Scope */
+        _current_scope = new ScopeVariables(NULL);
+        /* Make Program Scope */
+        _current_scope = new ScopeVariables(_current_scope);
+        Word* look_word = reinterpret_cast<Word*>(_lookahead);
+        Id* program_id = new Id(look_word, new Type(look_word->get_lexeme(), ID, look_word->get_lexeme().length(), _lookahead->get_line()),_lookahead->get_line());   
+        _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
+        match(ID);
+        match(IS);
+        Statement* s = block(false);
+        // s->generate(_writer);
+        match(PROGRAM);
+        match(END_DOT);
     }
     catch(COMPILER_EXCEPTION e) 
     {
@@ -60,25 +79,6 @@ void Parser::match(int token_type)
         _logger->error(e.what());
         return;
     }
-}
-
-void Parser::program()
-{
-    move();
-    match(PROGRAM); 
-    /* Make Global Scope */
-    _current_scope = new ScopeVariables(NULL);
-    /* Make Program Scope */
-    _current_scope = new ScopeVariables(_current_scope);
-    Word* look_word = reinterpret_cast<Word*>(_lookahead);
-    Id* program_id = new Id(look_word, new Type(look_word->get_lexeme(), ID, look_word->get_lexeme().length(), _lookahead->get_line()),_lookahead->get_line());   
-    _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
-    match(ID);
-    match(IS);
-    Statement* s = block(false);
-    // s->generate(_writer);
-    match(PROGRAM);
-    match(END_DOT);
 }
 
 Statement* Parser::block(bool is_procedure)
@@ -114,47 +114,33 @@ void Parser::declarations()
             Id* id = new Id(id_word, id_type, id_token->get_line());
             id->set_global();
             // Put in global scope
-            try 
+            if (!_current_scope->is_global_scope(id_word->get_lexeme()))
             {
-                _current_scope->is_in_scope(id_word->get_lexeme());
-            }
-            catch(COMPILER_EXCEPTION e) 
-            {
-                if (e.type == 0)
-                {
-                    _logger->error(string(e.message));
-                }
-                else if (e.type == 1)
-                {
-                    _logger->user_error(string(e.message));
-                }
-                return;
-            }
-            catch (string e)
-            {
-                _logger->error(e);
-                return;
-            }
-            catch(std::exception& e) {
-                _logger->error("unknown error");
-                _logger->error(e.what());
-                return;
-            }
+                _current_scope->add_global(id_word->get_lexeme(), id);
+                string name = id_word->get_lexeme();
 
-            _current_scope->add_global(id_word->get_lexeme(), id);
-            string name = id_word->get_lexeme();
+                string width = "i8";
+                string type = "c";
+                if (id_type->get_lexeme() == "integer")
+                {
+                    width = "i16";
+                }
+                else if (id_type->get_lexeme() == "float")
+                {
+                    width = "i32";
+                }
+                _writer->append_global("@" + name + " = extern global " + width + "\n");
+            }
+            else
+            {
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = USER_ERROR;
+                strcpy(compiler_exception.message, string("Identifier " + id_word->get_lexeme() + " already declared in this scope int line " + std::to_string(id_token->get_line())).c_str());
+                throw compiler_exception;
+            }
+            
 
-            string width = "i8";
-            string type = "c";
-            if (id_type->get_lexeme() == "integer")
-            {
-                width = "i16";
-            }
-            else if (id_type->get_lexeme() == "float")
-            {
-                width = "i32";
-            }
-            _writer->append_global("@" + name + " = extern global " + width + "\n");
+            
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == VARIABLE)
@@ -167,45 +153,31 @@ void Parser::declarations()
             Word* id_word =  reinterpret_cast<Word*>(id_token);
             Id* id = new Id(id_word, id_type, id_token->get_line());
             // Put in scope
-            try 
+            if (!_current_scope->is_in_scope(id_word->get_lexeme()))
             {
-                _current_scope->is_in_scope(id_word->get_lexeme());
-            }
-            catch(COMPILER_EXCEPTION e) 
-            {
-                if (e.type == 0)
+                _current_scope->add(id_word->get_lexeme(), id);
+                string name = id_word->get_lexeme();
+                string width = "i8";
+                string type = "c";
+                if (id_type->get_lexeme() == "integer")
                 {
-                    _logger->error(string(e.message));
+                    width = "i16";
                 }
-                else if (e.type == 1)
+                else if (id_type->get_lexeme() == "float")
                 {
-                    _logger->user_error(string(e.message));
+                    width = "i32";
                 }
-                return;
+                _writer->append_main("%" + name + " = private " + width + "\n");
             }
-            catch (string e)
+            else
             {
-                _logger->error(e);
-                return;
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = USER_ERROR;
+                strcpy(compiler_exception.message, string("Identifier " + id_word->get_lexeme() + " already declared in this scope in line " + std::to_string(id_token->get_line())).c_str());
+                throw compiler_exception;
             }
-            catch(std::exception& e) {
-                _logger->error("unknown error");
-                _logger->error(e.what());
-                return;
-            }
-            _current_scope->add(id_word->get_lexeme(), id);
-            string name = id_word->get_lexeme();
-            string width = "i8";
-            string type = "c";
-            if (id_type->get_lexeme() == "integer")
-            {
-                width = "i16";
-            }
-            else if (id_type->get_lexeme() == "float")
-            {
-                width = "i32";
-            }
-            _writer->append_main("%" + name + " = private " + width + "\n");
+
+        
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == PROCEDURE)
@@ -258,36 +230,12 @@ void Parser::parameter()
     Type* id_type = type();
     Word* id_word =  reinterpret_cast<Word*>(id_token);
     Id* id = new Id(id_word, id_type, id_token->get_line());
-    // Put in global scope
-    try 
+
+    if (!_current_scope->is_in_scope(id_word->get_lexeme()))
     {
-        _current_scope->is_in_scope(id_word->get_lexeme());
-    }
-    catch(COMPILER_EXCEPTION e) 
-    {
-        if (e.type == 0)
-        {
-            _logger->error(string(e.message));
-        }
-        else if (e.type == 1)
-        {
-            _logger->user_error(string(e.message));
-        }
-        return;
-    }
-    catch (string e)
-    {
-        _logger->error(e);
-        return;
-    }
-    catch(std::exception& e) {
-        _logger->error("unknown error");
-        _logger->error(e.what());
-        return;
+        _current_scope->add_global(id_word->get_lexeme(), id);
     }
 
-    _current_scope->add_global(id_word->get_lexeme(), id);
-    
 }
 
 Type* Parser::type()
@@ -518,50 +466,38 @@ Expression* Parser::factor()
 Statement* Parser::assign()
 {
     Token* token = _lookahead;
-    Id* id;
+    Id* id = NULL;
     match(ID);
     Word* id_word =  reinterpret_cast<Word*>(token);
 
-    try 
+    
+    id = _current_scope->find(id_word->get_lexeme());
+    if (id)
     {
-        id = _current_scope->find(id_word->get_lexeme());
-    }
-    catch(COMPILER_EXCEPTION e) 
-    {
-        if (e.type == 0)
+        if (_lookahead->get_type() == COLON_EQUALS)
         {
-            _logger->error(string(e.message));
+            match(COLON_EQUALS);
+            Statement* statement = new Set(id, boolean(), _lookahead->get_line());
+            // Set* hmm = (Set*)statement;
+            // hmm->generate(_writer);
+            match(SEMI_COLON);
+            return statement;
         }
-        else if (e.type == 1)
+        else
         {
-            _logger->user_error(string(e.message));
+            throw string("Under construction");
         }
-        return NULL;
-    }
-    catch (string e)
-    {
-        _logger->error(e);
-        return NULL;
-    }
-    catch(std::exception& e) {
-        _logger->error("unknown error");
-        _logger->error(e.what());
-        return NULL;
-    }
-
-    if (_lookahead->get_type() == COLON_EQUALS)
-    {
-        match(COLON_EQUALS);
-        Statement* statement = new Set(id, boolean(), _lookahead->get_line());
-        Set* hmm = (Set*)statement;
-        hmm->generate(_writer);
-        match(SEMI_COLON);
-        return statement;
     }
     else
     {
-        throw string("Under construction");
+        COMPILER_EXCEPTION compiler_exception;
+        compiler_exception.type = USER_ERROR;
+        strcpy(compiler_exception.message, string("ID " + id_word->get_lexeme() + " not defined in scope.in line " + to_string(_lookahead->get_line())).c_str());
+        // yeet that thing
+        throw compiler_exception;
     }
+    
+
     
     
 }

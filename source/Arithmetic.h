@@ -27,6 +27,18 @@ public:
         string opr = "";
         switch(_op->get_type())
         {
+            case ID:
+            {
+                Id* id = (Id*)_expression_1;
+                string expr1 = "%";
+                if (id->is_global())
+                {
+                    expr1 = "@";
+                }
+                expr1 +=id->get_word()->get_lexeme();
+                return string(expr1);
+                break;
+            }
             case PLUS:
             {
                 opr = "add i32 ";

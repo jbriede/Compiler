@@ -51,14 +51,26 @@ public:
 
         if ( got == _table->end() )
         {
-            return true;
+            return false;
+        }
+        return true;
+    }
+
+    bool is_global_scope(string lexeme)
+    {
+        if (_previous_scope != NULL)
+        {
+            return _previous_scope->is_global_scope(lexeme);
         }
         else
         {
-            COMPILER_EXCEPTION compiler_exception;
-            compiler_exception.type = USER_ERROR;
-            strcpy(compiler_exception.message, string("Identifier " + lexeme + " already declared in this scope ").c_str());
-            throw compiler_exception;
+            std::unordered_map<std::string,Id*>::const_iterator got = _table->find(lexeme);
+
+            if ( got == _table->end() )
+            {
+                return false;
+            }
+            return true; 
         }
     }
 
