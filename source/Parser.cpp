@@ -95,6 +95,7 @@ Statement* Parser::block(bool is_procedure)
     {
         _writer->append_main("}");
     }
+    
     return s;
 }
 
@@ -188,40 +189,62 @@ void Parser::declarations()
             match(COLON);
             
             Type* return_type = type();
-            Id* id = new Id(reinterpret_cast<Word*>(id_token), return_type, id_token->get_line());
+            Word* id_word =  reinterpret_cast<Word*>(id_token);
+            //Id* id = new Procedure(id_word, return_type, parameters(), id_token->get_line());
 
-            
-            ScopeVariables* saved = _current_scope;
-            _current_scope = new ScopeVariables(saved);
-            match(OPEN_PARENTHESIS);
-            parameters();
-            match(CLOSE_PARENTHESIS);
-            Statement* procedure_statement = block(true);
-            // Probably need to do something with this
-            match(PROCEDURE);
-            
+            if (!_current_scope->is_in_scope(id_word->get_lexeme()))
+            {   ScopeVariables* saved = _current_scope;
+                _current_scope = new ScopeVariables(saved);
 
+                match(OPEN_PARENTHESIS);
 
-            // Put in scope
-            match(SEMI_COLON);
-            _current_scope = saved;
+                Procedure* procedure = new Procedure(id_word, return_type, parameters(), id_token->get_line());
+
+                match(CLOSE_PARENTHESIS);
+
+                Statement* procedure_statement = block(true);
+                match(PROCEDURE);
+                match(SEMI_COLON);
+
+                _current_scope = saved;
+
+                _current_scope->add(id_word->get_lexeme(), procedure);
+            }
+            else
+            {
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = USER_ERROR;
+                strcpy(compiler_exception.message, string("Identifier " + id_word->get_lexeme() + " already declared in this scope in line " + std::to_string(id_token->get_line())).c_str());
+                throw compiler_exception;
+            }
         }
     }
 }
 
-void Parser::parameters()
+Parameter* Parser::parameters()
 {
+    Parameter* param = NULL;
+    Parameter* param2 = NULL;
+    if (_lookahead->get_type() != CLOSE_PARENTHESIS)
+    {
+        param = parameter();
+    }
+    param2 = param;
     while (_lookahead->get_type() != CLOSE_PARENTHESIS)
     {
-        parameter();
         if (_lookahead->get_type() == COMMA)
         {
             match(COMMA);
         }
+        // Send it up the chain of params...
+        Parameter* new_param = parameter();
+        param2->set_next(new_param);
+        param2 = new_param;
     }
+    return param;
 }
 
-void Parser::parameter()
+Parameter* Parser::parameter()
 {
     match(VARIABLE);
     Token* id_token = _lookahead;
@@ -234,8 +257,16 @@ void Parser::parameter()
     if (!_current_scope->is_in_scope(id_word->get_lexeme()))
     {
         _current_scope->add_global(id_word->get_lexeme(), id);
+        return new Parameter(id);
     }
-
+    else
+    {
+        COMPILER_EXCEPTION compiler_exception;
+        compiler_exception.type = USER_ERROR;
+        strcpy(compiler_exception.message, string("Identifier " + id_word->get_lexeme() + " already declared in this scope in line " + std::to_string(id_token->get_line())).c_str());
+        throw compiler_exception;
+    }
+    
 }
 
 Type* Parser::type()
@@ -274,12 +305,18 @@ Statement* Parser::statement()
             Statement* statement1 = statement();
             if (_lookahead->get_type() != ELSE)
             {
+                match(END);
+                match(IF);
+                match(SEMI_COLON);
                 return new If(expression, statement1, _lookahead->get_line());
             } 
             else
             {
                 match(ELSE);
                 Statement* statement2 = statement();
+                match(END);
+                match(IF);
+                match(SEMI_COLON);
                 return new Else(expression, statement1, statement2, _lookahead->get_line());
             }
         }
@@ -292,7 +329,11 @@ Statement* Parser::statement()
             match(RETURN);
             Expression* hmm = boolean();
             Id* return_id = reinterpret_cast<Id*>(hmm);
-            return NULL;
+            return NULL; // TODO
+        }
+        case FOR:
+        {
+            
         }
         default:
             throw string("Not sure whats going on ");

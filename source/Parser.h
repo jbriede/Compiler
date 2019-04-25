@@ -22,6 +22,8 @@
 #include "Unary.h"
 #include "Set.h" 
 #include "Writer.h" 
+#include "Parameter.h"
+#include "Procedure.h"
 
 
 
@@ -67,8 +69,8 @@ private:
     Expression* unary();
     Expression* factor();
     Statement* assign();
-    void parameters();
-    void parameter();
+    Parameter* parameters();
+    Parameter* parameter();
 
 };
 

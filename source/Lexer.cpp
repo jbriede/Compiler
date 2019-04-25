@@ -251,6 +251,11 @@ Token* Lexer::get_token()
             _current_word = "";
             return new Token(END_DOT, _current_lexer_line);
         }
+        else if (_current_word == ",")
+        {
+            _current_word = "";
+            return new Token(COMMA, _current_lexer_line);
+        }
         /* Else we need to decipher words that could be grammer or ids */
         else
         {
@@ -353,6 +358,11 @@ Token* Lexer::get_token()
                     _current_word = "";
                     return new Type("integer", BASIC, 2, _current_lexer_line);
                 }
+                else if (_current_word == "float")
+                {
+                    _current_word = "";
+                    return new Type("float", BASIC, 4, _current_lexer_line);
+                }
                 else if (_current_word == "bool")
                 {
                     _current_word = "";
@@ -377,6 +387,11 @@ Token* Lexer::get_token()
                 {
                     _current_word = "";
                     return new Word("if", IF, _current_lexer_line);
+                }
+                else if (_current_word == "else")
+                {
+                    _current_word = "";
+                    return new Word("else", ELSE, _current_lexer_line);
                 }
                 else if (_current_word == "true")
                 {
@@ -450,6 +465,7 @@ bool Lexer::_end_of_token(char* character)
     || (strcmp(character,"(") == 0) 
     || (strcmp(character,")") == 0)
     || (strcmp(character,":") == 0) 
+    || (strcmp(character,",") == 0) 
     || (strcmp(character,";") == 0) 
     || (strcmp(character,"<") == 0) 
     || (strcmp(character,">") == 0)
