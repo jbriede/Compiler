@@ -10,6 +10,7 @@
 #include "If.h"
 #include "Else.h"
 #include "And.h"
+#include "For.h"
 #include "Expression.h"
 #include "Or.h"
 #include "Sequence.h"
@@ -24,6 +25,8 @@
 #include "Writer.h" 
 #include "Parameter.h"
 #include "Procedure.h"
+#include "ProcedureCall.h"
+#include "Argument.h"
 
 
 
@@ -40,27 +43,26 @@ public:
     void program();
     
 private:
+    /* Access to other import classes */
     Logger* _logger;
     Lexer* _lexer;
     Writer* _writer;
 
+    /* Next token */
     Token* _lookahead;
 
+    /* Pointer to current level of Symbol table */
     ScopeVariables* _current_scope;
 
     void move();
-    void declarations();
-
     void match(int token_type);
 
+    void declarations();
     Type* type();
-
     Statement* block(bool is_procedure);
     Statement* statement();
     Statement* statements();
-    
     Expression* boolean();
-
     Expression* join();
     Expression* equality();
     Expression* relationship();
@@ -71,6 +73,9 @@ private:
     Statement* assign();
     Parameter* parameters();
     Parameter* parameter();
+    Argument* arguments();
+    Argument* argument();
+    Expression* procedure_call(Id* id);
 
 };
 

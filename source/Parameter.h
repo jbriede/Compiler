@@ -20,6 +20,10 @@ public:
     {
         _next_param = next_param;
     }
+    Parameter* get_next()
+    {
+        return _next_param;
+    }
     Id* get_id()
     {
         return _id;

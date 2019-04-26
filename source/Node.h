@@ -14,6 +14,10 @@ public:
     {
         _line = line;
     }
+    int get_line()
+    {
+        return _line;
+    }
 protected:
     int _line;
     

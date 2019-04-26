@@ -198,11 +198,12 @@ void Parser::declarations()
 
                 match(OPEN_PARENTHESIS);
 
-                Procedure* procedure = new Procedure(id_word, return_type, parameters(), id_token->get_line());
+                Parameter* params = parameters();
 
                 match(CLOSE_PARENTHESIS);
 
                 Statement* procedure_statement = block(true);
+                Procedure* procedure = new Procedure(id_word, return_type, params, procedure_statement, id_token->get_line());
                 match(PROCEDURE);
                 match(SEMI_COLON);
 
@@ -269,6 +270,35 @@ Parameter* Parser::parameter()
     
 }
 
+Argument* Parser::arguments()
+{
+    Argument* args1 = NULL;
+    Argument* args2 = NULL;
+    if (_lookahead->get_type() != CLOSE_PARENTHESIS)
+    {
+        args1 = argument();
+    }
+    args2 = args1;
+    while (_lookahead->get_type() != CLOSE_PARENTHESIS)
+    {
+        if (_lookahead->get_type() == COMMA)
+        {
+            match(COMMA);
+        }
+        // Send it up the chain of params...
+        Argument* new_arg = argument();
+        args2->set_next(new_arg);
+        args2 = new_arg;
+    }
+    return args1;
+}
+
+Argument* Parser::argument()
+{
+    Expression* expression = boolean();
+    return new Argument(expression);
+}
+
 Type* Parser::type()
 {
     // Do dimension stuff...
@@ -333,7 +363,19 @@ Statement* Parser::statement()
         }
         case FOR:
         {
+            match(FOR);
+            match(OPEN_PARENTHESIS);
+            Statement* assign_statements = assign();
+            Expression* expression = boolean();
+            match(CLOSE_PARENTHESIS);
+
+            Statement* stmt = statement();
+            match(END);
+            match(FOR);
+            match(SEMI_COLON);
             
+            return new For(stmt, expression, _lookahead->get_line());
+
         }
         default:
             throw string("Not sure whats going on ");
@@ -341,6 +383,16 @@ Statement* Parser::statement()
     }
     return NULL;
 }
+
+Expression* Parser::procedure_call(Id* id)
+{
+    Argument* args = arguments();
+    match(CLOSE_PARENTHESIS);
+    Procedure* procedure = (Procedure*)id;
+    ProcedureCall* procedure_call = new ProcedureCall(procedure, args, _lookahead->get_line());
+    return procedure;
+}
+
 Expression* Parser::boolean()
 {
     Expression* expression = join();
@@ -492,6 +544,11 @@ Expression* Parser::factor()
             {
                 throw string("under construction");
             }
+            else if (_lookahead->get_type() == OPEN_PARENTHESIS)
+            {
+                move();
+                return procedure_call(id);
+            }
             else
             {
                 return id;
@@ -508,9 +565,8 @@ Statement* Parser::assign()
 {
     Token* token = _lookahead;
     Id* id = NULL;
-    match(ID);
     Word* id_word =  reinterpret_cast<Word*>(token);
-
+    match(ID);
     
     id = _current_scope->find(id_word->get_lexeme());
     if (id)
@@ -528,6 +584,7 @@ Statement* Parser::assign()
         {
             throw string("Under construction");
         }
+        
     }
     else
     {

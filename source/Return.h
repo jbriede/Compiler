@@ -9,10 +9,10 @@
 #include "Writer.h"
 using namespace std;
 
-class If : public Statement
+class FunctionCall : public Statement
 {
 public:
-    If (Expression* expression, Statement* statement, int line): Statement(line)
+    FunctionCall(Expression* expression, Statement* statement, int line): Statement(line)
     {
         _expression = expression;
         _statement = statement;
