@@ -137,9 +137,13 @@ Token* Lexer::get_token()
             _current_lexer_line +=1;
             return get_token();
         }
-        if (_current_word == "\0")
+        /* This is the only dumb way I could make this work */
+        string blah = "";
+        char blah2 = 0;
+        blah+= blah2;
+        if (_current_word == blah)
         {
-            throw string("hmm");
+            return new Token(END_OF_FILE, _current_lexer_line);
         }
         if (_current_word == "\r")
         {
@@ -454,20 +458,11 @@ Token* Lexer::get_token()
                 }
 
                 /* Ok So its probably an ID */
-                // Symbol* sym = new Symbol;
                 if (_current_word.length() > 32)
                 {
                     throw string("String lengths cant be longer than 32 ");
                 }
-                // memset ((*sym).symbol_name,'\0',32); /* shouldnt be necesary but it is ?? */
-                // strncpy((*sym).symbol_name, _current_word.c_str(), _current_word.length());
-                // TOKEN_NAMES name = ID;
-                // token->token_name = name;
-                // token->line_number = _current_lexer_line;
-                // token->symbol = sym;
-                // _current_word = "";
 
-                //_symboTable->add_symbol(sym);
                 string temp = _current_word;
                 _current_word = "";
                 return new Word(temp, ID, _current_lexer_line);                
