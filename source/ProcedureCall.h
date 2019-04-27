@@ -41,7 +41,120 @@ private:
             else
             {
                 // now we have to check types 
-                std::cout << "hmmm";
+                Expression* arg_expression = arg->get_expression();
+                Id* param_id = param->get_id();
+
+                Type* arg_type = arg_expression->get_type();
+                Type* param_type = param_id->get_type();
+
+                if (param_type->get_lexeme() == "integer")
+                {
+                    if (arg_type->get_lexeme() == "integer" )
+                    {
+                        break;
+                    }
+                    else if (arg_type->get_lexeme() == "float" )
+                    {
+                        // works, but we have to truncate
+                        break;
+                    }
+                    else if (arg_type->get_lexeme() == "string" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected integer, got string int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                    else if (arg_type->get_lexeme() == "boolean" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected integer, got bool int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                }
+                else if (param_type->get_lexeme() == "float")
+                {
+                    if (arg_type->get_lexeme() == "integer" )
+                    {
+                        // works, but we have to casr
+                        break;
+                    }
+                    else if (arg_type->get_lexeme() == "float" )
+                    {
+                        // works, but we have to cast
+                        break;
+                    }
+                    else if (arg_type->get_lexeme() == "string" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected float, got string int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                    else if (arg_type->get_lexeme() == "bool" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected float, got bool int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                }
+                else if (param_type->get_lexeme() == "string")
+                {
+                    if (arg_type->get_lexeme() == "integer" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected string, got integer int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                    else if (arg_type->get_lexeme() == "float" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected string, got float int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                    else if (arg_type->get_lexeme() == "string" )
+                    {
+                        break;
+                    }
+                    else if (arg_type->get_lexeme() == "bool" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected string, got bool int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                }
+                else if (param_type->get_lexeme() == "bool")
+                {
+
+                    if (arg_type->get_lexeme() == "integer" )
+                    {
+                        // works??
+                        break;
+                    }
+                    else if (arg_type->get_lexeme() == "float" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected bool, got float int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                    else if (arg_type->get_lexeme() == "string" )
+                    {
+                        COMPILER_EXCEPTION compiler_exception;
+                        compiler_exception.type = USER_ERROR;
+                        strcpy(compiler_exception.message, string("Expected bool, got string int line " + std::to_string(get_line())).c_str());
+                        throw compiler_exception;
+                    }
+                    else if (arg_type->get_lexeme() == "bool" )
+                    {
+                        break;
+                    }
+                }
             }
             arg = arg->get_next();
             param = param->get_next();

@@ -524,14 +524,14 @@ Expression* Parser::factor()
         case TRUE:
         {
             Word* true_token = reinterpret_cast<Word*>(_lookahead);
-            expression = new Constant(true_token, new Type("true", TRUE, 1, _lookahead->get_line()) ,_lookahead->get_line());
+            expression = new Constant(true_token, new Type("boolean", TRUE, 1, _lookahead->get_line()) ,_lookahead->get_line());
             move();
             break;
         }
         case FALSE:
         {
             Word* false_token = reinterpret_cast<Word*>(_lookahead);
-            expression = new Constant(false_token, new Type("false", FALSE, 1, _lookahead->get_line()) ,_lookahead->get_line());
+            expression = new Constant(false_token, new Type("boolean", FALSE, 1, _lookahead->get_line()) ,_lookahead->get_line());
             move();
             break;
         }
