@@ -9,6 +9,7 @@
 #include "Type.h"
 #include "Logger.h"
 #include "Word.h"
+#include "String.h"
 
 #ifndef Lexer_h
 #define Lexer_h

@@ -256,6 +256,34 @@ Token* Lexer::get_token()
             _current_word = "";
             return new Token(COMMA, _current_lexer_line);
         }
+        /* How about strings */
+        else if (_current_word == "\"")
+        {
+            while(true)
+            {
+                _current_word = "";
+                _get_character_from_stream(_c);
+
+                if (strcmp(_c,"\"") == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    _current_word += _c;
+                }
+                
+                if (_current_word.length() > 500)
+                {
+                    throw string("Can't find the end of the string!!!!!");
+                }
+            }
+
+            string text = _current_word;
+            _current_word = "";
+            return new String(text, _current_lexer_line);
+            
+        }
         /* Else we need to decipher words that could be grammer or ids */
         else
         {
@@ -310,7 +338,7 @@ Token* Lexer::get_token()
                 while (1)
                 {
                     _peek_character_from_stream(_c);
-                    if ((strcmp(_c,"\\0") == 0))
+                    if ((strcmp(_c,"\0\0") == 0))
                     {
                         return new Token(END_OF_FILE, _current_lexer_line);
                     }
@@ -367,6 +395,12 @@ Token* Lexer::get_token()
                 {
                     _current_word = "";
                     return new Type("bool", BASIC, 1, _current_lexer_line);
+                }
+                else if (_current_word == "string")
+                {
+                    _current_word = "";
+                    /* Not sure what to say the length of the string is... lets go with -t... */ 
+                    return new Type("string", BASIC, -1, _current_lexer_line);
                 }
                 else if (_current_word == "end")
                 {

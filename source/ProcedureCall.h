@@ -35,7 +35,7 @@ private:
             {
                 COMPILER_EXCEPTION compiler_exception;
                 compiler_exception.type = USER_ERROR;
-                strcpy(compiler_exception.message, string("Incorrect number of arguments for procedure call " + _procedure->get_word()->get_lexeme() + " int line " + std::to_string(get_line())).c_str());
+                strcpy(compiler_exception.message, string("Incorrect number of arguments for procedure call " + _procedure->get_word()->get_lexeme() + " in line " + std::to_string(get_line())).c_str());
                 throw compiler_exception;
             }
             else

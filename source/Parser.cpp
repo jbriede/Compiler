@@ -535,6 +535,13 @@ Expression* Parser::factor()
             move();
             break;
         }
+        case STRING:
+        {
+            String* string_token = reinterpret_cast<String*>(_lookahead);
+            expression = new Constant(string_token, new Type("string", STRING, string_token->get_value().length(), _lookahead->get_line()) ,_lookahead->get_line());
+            move();
+            break;
+        }
         case ID:
         {
             Word* id_word = reinterpret_cast<Word*>(_lookahead);
@@ -593,9 +600,5 @@ Statement* Parser::assign()
         strcpy(compiler_exception.message, string("ID " + id_word->get_lexeme() + " not defined in scope.in line " + to_string(_lookahead->get_line())).c_str());
         // yeet that thing
         throw compiler_exception;
-    }
-    
-
-    
-    
+    } 
 }

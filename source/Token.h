@@ -54,7 +54,8 @@ enum TOKEN_TYPE
     COMMA,
     BOOL, //42
     RETURN,
-    TEMP
+    TEMP,
+    STRING
 };
 const std::string type_as_strings[] = 
 {
@@ -102,7 +103,8 @@ const std::string type_as_strings[] =
     "COMMA",
     "BOOL",
     "RETURN",
-    "TEMP"
+    "TEMP",
+    "STRING"
 };
 
 class Token

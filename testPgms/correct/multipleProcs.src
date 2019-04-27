@@ -25,6 +25,6 @@ end procedure;
 begin
 
 y := Proc1(y);
-
+tmp := putInteger(y);  // Result should be 3
 
 end program.
