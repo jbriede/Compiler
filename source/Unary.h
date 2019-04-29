@@ -11,7 +11,7 @@ using namespace std;
 class Unary : public Operation
 {
 public:
-    Unary(Token* token, Expression* expression, int line): Operation(token, NULL, line)
+    Unary(Token* token, Expression* expression, int line): Operation(token, expression->get_type(), line)
     {
 
     }

@@ -13,7 +13,7 @@ class Not : public Logical
 public:
     Not(Token* token, Expression* expression1, int line): Logical(token, expression1, expression1, line)
     {
-        
+        TypeChecker(expression1, "bool", line);
     }
 private:
 

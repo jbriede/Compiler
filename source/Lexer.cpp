@@ -159,6 +159,18 @@ Token* Lexer::get_token()
             _current_word = "";
             return get_token();
         }
+        else if (_current_word == "!")
+        {
+            _current_word = "";
+            _peek_character_from_stream(_c);
+            if (strcmp(_c,"=") == 0)
+            {
+                _get_character_from_stream(_c);
+                _current_word = "";
+                return new Word("!=", NOTEQUALS, _current_lexer_line);
+            }
+            return new Token(NOT, _current_lexer_line);
+        }
         /* Lets do some symbols */
         else if (_current_word == "+")
         {
@@ -181,7 +193,10 @@ Token* Lexer::get_token()
             }
             else
             {
-               throw string("we should never be in this situation");
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = USER_ERROR;
+                strcpy(compiler_exception.message, string("= by its self is not valid in line " + to_string(_current_lexer_line)).c_str());
+                throw compiler_exception;
             }
         }
         else if (_current_word == "[")

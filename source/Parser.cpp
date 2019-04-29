@@ -105,8 +105,8 @@ void Parser::make_built_in_functions()
 
 void Parser::program()
 {
-    try 
-    {
+    // try 
+    // {
         move();
         match(PROGRAM); 
         /* Make Global Scope */
@@ -124,29 +124,29 @@ void Parser::program()
         match(PROGRAM);
         match(END_DOT);
         _logger->info("Program parsed with 0 error... well at least that I found");
-    }
-    catch(COMPILER_EXCEPTION e) 
-    {
-        if (e.type == 0)
-        {
-            _logger->error(string(e.message));
-        }
-        else if (e.type == 1)
-        {
-            _logger->user_error(string(e.message));
-        }
-        return;
-    }
-    catch (string e)
-    {
-        _logger->error(e);
-        return;
-    }
-    catch(std::exception& e) {
-        _logger->error("unknown error");
-        _logger->error(e.what());
-        return;
-    }
+    // }
+    // catch(COMPILER_EXCEPTION e) 
+    // {
+    //     if (e.type == 0)
+    //     {
+    //         _logger->error(string(e.message));
+    //     }
+    //     else if (e.type == 1)
+    //     {
+    //         _logger->user_error(string(e.message));
+    //     }
+    //     return;
+    // }
+    // catch (string e)
+    // {
+    //     _logger->error(e);
+    //     return;
+    // }
+    // catch(std::exception& e) {
+    //     _logger->error("unknown error");
+    //     _logger->error(e.what());
+    //     return;
+    // }
 }
 
 Statement* Parser::block(bool is_procedure)
@@ -499,22 +499,22 @@ Expression* Parser::relationship()
     {
         case LESS_THAN:
         {
-            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
+            token = _lookahead; move(); expression = new Relationship(token, expression, exp(), new Type("bool", BOOL, 1, _lookahead->get_line()),  _lookahead->get_line());
             return expression;
         }
         case GREATER_THAN:
         {
-            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
+            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),new Type("bool", BOOL, 1, _lookahead->get_line()),  _lookahead->get_line());
             return expression;
         }
         case LESS_THAN_EQUALS:
         {
-            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
+            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),new Type("bool", BOOL, 1, _lookahead->get_line()),  _lookahead->get_line());
             return expression;
         }
         case GREATER_THAN_EQUALS:
         {
-            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
+            token = _lookahead; move(); expression = new Relationship(token, expression, exp(),new Type("bool", BOOL, 1, _lookahead->get_line()),  _lookahead->get_line());
             return expression;
         }
         // case EQUALS:
@@ -594,14 +594,14 @@ Expression* Parser::factor()
         case TRUE:
         {
             Word* true_token = reinterpret_cast<Word*>(_lookahead);
-            expression = new Constant(true_token, new Type("boolean", TRUE, 1, _lookahead->get_line()) ,_lookahead->get_line());
+            expression = new Constant(true_token, new Type("bool", TRUE, 1, _lookahead->get_line()) ,_lookahead->get_line());
             move();
             break;
         }
         case FALSE:
         {
             Word* false_token = reinterpret_cast<Word*>(_lookahead);
-            expression = new Constant(false_token, new Type("boolean", FALSE, 1, _lookahead->get_line()) ,_lookahead->get_line());
+            expression = new Constant(false_token, new Type("bool", FALSE, 1, _lookahead->get_line()) ,_lookahead->get_line());
             move();
             break;
         }
@@ -620,6 +620,14 @@ Expression* Parser::factor()
             if (_lookahead->get_type() == OPEN_BRACKET)
             {
                 throw string("under construction");
+            }
+            else if (_lookahead->get_type() == COLON_EQUALS)
+            {
+                COMPILER_EXCEPTION compiler_exception;
+                compiler_exception.type = USER_ERROR;
+                strcpy(compiler_exception.message, string("Looking for expression not assignment in line " + to_string(_lookahead->get_line())).c_str());
+                // yeet that thing
+                throw compiler_exception;
             }
             else if (_lookahead->get_type() == OPEN_PARENTHESIS)
             {

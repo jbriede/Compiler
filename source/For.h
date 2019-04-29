@@ -15,6 +15,7 @@ public:
     {
         _statement = statement;
         _expression = expression;
+        TypeChecker(_expression, "bool", line);
     }
     void generate(Writer* writer)
     {

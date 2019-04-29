@@ -36,7 +36,7 @@ public:
                 strcpy(compiler_exception.message, string("Expected integer, got string int line " + std::to_string(line)).c_str());
                 throw compiler_exception;
             }
-            else if (returned_type_s == "boolean" )
+            else if (returned_type_s == "bool" )
             {
                 COMPILER_EXCEPTION compiler_exception;
                 compiler_exception.type = USER_ERROR;

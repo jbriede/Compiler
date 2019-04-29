@@ -32,7 +32,7 @@ public:
             {
                 COMPILER_EXCEPTION compiler_exception;
                 compiler_exception.type = USER_ERROR;
-                strcpy(compiler_exception.message, string("Id " + lexeme + " not declared.").c_str());
+                strcpy(compiler_exception.message, string("Id " + lexeme + " not declared in line ").c_str());
                 throw compiler_exception;
             }
         }
