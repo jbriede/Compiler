@@ -28,6 +28,9 @@
 #include "ProcedureCall.h"
 #include "Argument.h"
 #include "Return.h"
+#include "Access.h"
+#include "SetElement.h"
+#include "Array.h"
 
 
 
@@ -62,6 +65,7 @@ private:
 
     void declarations();
     Type* type();
+    Type* dims(Type* t);
     Statement* block(bool is_procedure);
     Statement* statement();
     Statement* statements();
@@ -74,6 +78,7 @@ private:
     Expression* unary();
     Expression* factor();
     Statement* assign();
+    Access* offset(Id* id);
     Parameter* parameters();
     Parameter* parameter();
     Argument* arguments();

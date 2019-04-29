@@ -21,6 +21,10 @@ public:
     {
         return _lexeme;
     }
+    int get_width()
+    {
+        return _width;
+    }
 private:
     int _width;
     string _lexeme;

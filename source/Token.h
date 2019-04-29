@@ -55,7 +55,8 @@ enum TOKEN_TYPE
     BOOL, //42
     RETURN,
     TEMP,
-    STRING
+    STRING,
+    ARRAY
 };
 const std::string type_as_strings[] = 
 {
@@ -104,7 +105,8 @@ const std::string type_as_strings[] =
     "BOOL",
     "RETURN",
     "TEMP",
-    "STRING"
+    "STRING",
+    "ARRAY"
 };
 
 class Token

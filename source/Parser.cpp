@@ -208,8 +208,6 @@ void Parser::declarations()
                 throw compiler_exception;
             }
             
-
-            
             match(SEMI_COLON);
         }
         else if (_lookahead->get_type() == VARIABLE)
@@ -372,10 +370,23 @@ Argument* Parser::argument()
 
 Type* Parser::type()
 {
-    // Do dimension stuff...
     Type* t = reinterpret_cast<Type*>(_lookahead);
     match(BASIC);
+    if (_lookahead->get_type() == OPEN_BRACKET)
+    {
+        return dims(t);
+    }
     return t;
+}
+
+Type* Parser::dims(Type* t)
+{
+    match(OPEN_BRACKET);
+    Token* token = _lookahead;
+    match(INT_VAL);
+    match(CLOSE_BRACKET);
+    return new Array(t, ((Integer*)token)->get_value(), _lookahead->get_line());
+
 }
 Statement* Parser::statements()
 {
@@ -414,7 +425,7 @@ Statement* Parser::statement()
             else
             {
                 match(ELSE);
-                Statement* statement2 = statement();
+                Statement* statement2 = statements();
                 match(END);
                 match(IF);
                 match(SEMI_COLON);
@@ -619,7 +630,7 @@ Expression* Parser::factor()
             move();
             if (_lookahead->get_type() == OPEN_BRACKET)
             {
-                throw string("under construction");
+                return offset(id);
             }
             else if (_lookahead->get_type() == COLON_EQUALS)
             {
@@ -644,6 +655,16 @@ Expression* Parser::factor()
     }
     return expression;
             
+}
+
+Access* Parser::offset(Id* id)
+{
+    match(OPEN_BRACKET);
+    Expression* i = boolean();
+    match(CLOSE_BRACKET);
+    Array* arr_type = (Array*)id->get_type();
+    Type* type = arr_type->get_of();
+    return new Access(id, i, type, id->get_line());
 }
 
 Statement* Parser::assign()
@@ -672,11 +693,18 @@ Statement* Parser::assign()
             procedure_call(id);
             return NULL;
         }
+        else if (_lookahead->get_type() == OPEN_BRACKET)
+        {
+            Access* access = offset(id);
+            match(COLON_EQUALS);
+            Statement* s = new SetElement(access, boolean(), _lookahead->get_line());
+            match(SEMI_COLON);
+            return s;
+        }
         else
         {
             throw string("Under construction");
         }
-        
     }
     else
     {
