@@ -7,15 +7,17 @@
 #include <string.h>
 #include "Operation.h"
 #include "Expression.h"
+#include "TypeChecker.h"
 using namespace std;
 
 class Arithmetic : public Operation
 {
 public:
-    Arithmetic(Token* token, Expression* expression_1, Expression* expression_2, int line): Operation(token, NULL, line)
+    Arithmetic(Token* token, Expression* expression_1, Expression* expression_2, int line): Operation(token, expression_2->get_type(), line)
     {
         _expression_1 = expression_1;
         _expression_2 = expression_2;
+        TypeChecker(_expression_1, _expression_2, line);
     }
     Expression* generate()
     {

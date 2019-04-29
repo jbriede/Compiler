@@ -7,6 +7,7 @@
 #include <string.h>
 #include "Statement.h"
 #include "Writer.h"
+#include "TypeChecker.h"
 using namespace std;
 
 class If : public Statement
@@ -16,6 +17,7 @@ public:
     {
         _expression = expression;
         _statement = statement;
+        TypeChecker(_expression, "bool", line);
     }
     void generate(Writer* writer)
     {

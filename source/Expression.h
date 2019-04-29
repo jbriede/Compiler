@@ -6,6 +6,8 @@
 #include <string>
 #include <string.h>
 #include "Node.h"
+#include "Token.h"
+#include "Type.h"
 using namespace std;
 
 class Expression : public Node

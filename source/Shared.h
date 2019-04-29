@@ -2,10 +2,11 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "Expression.h"
+#include "Type.h"
 
 #ifndef Shared_h
 #define Shared_h
-
 
 
 // int x = 5;
@@ -31,4 +32,6 @@ struct COMPILER_EXCEPTION
     int type;
     char message[512];
 };
+
+
 #endif 

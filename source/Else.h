@@ -6,6 +6,7 @@
 #include <string>
 #include <string.h>
 #include "Statement.h"
+#include "TypeChecker.h"
 using namespace std;
 
 class Else : public Statement
@@ -16,6 +17,7 @@ public:
         _expression = expression;
         _statement1 = statement1;
         _statement2 = statement2;
+        TypeChecker(_expression, "bool", line);
     }
 private:
     Expression* _expression;

@@ -6,24 +6,21 @@
 #include <string>
 #include <string.h>
 #include "Expression.h"
+#include "TypeChecker.h"
 using namespace std;
 
 class Logical : public Expression
 {
 public:
-    Logical(Token* token, Expression* expression1, Expression* expression2, int line): Expression(token, NULL, line)
+    Logical(Token* token, Expression* expression1, Expression* expression2, int line): Expression(token, expression2->get_type(), line)
     {
-        if (!check(expression1->get_type(), expression2->get_type()))
-        {
-            throw string("Types dont match... also need to make this better");
-        }
+        TypeChecker(expression1, expression2, line);
+    }
+    Logical(Token* token, Expression* expression1, Expression* expression2, Type* type, int line): Expression(token, type, line)
+    {
+        TypeChecker(expression1, expression2, line);
     }
 private:
-    Type* _type;
-    bool check(Type* type_1, Type* type_2)
-    {
-        return type_1->get_lexeme() == type_2->get_lexeme();
-    }
     
 };
 

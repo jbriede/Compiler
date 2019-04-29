@@ -70,7 +70,8 @@ void Parser::make_built_in_functions()
     id_word =  new Word("putbool", BASIC, 0);
     // Will be used in the put bool function
     params = new Parameter(new Id(new Word("bool_val", BASIC, 0), new Type("bool", BASIC, 1, 0), 0));
-    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    return_type = new Type("bool", BASIC, 1, 0);
+    procedure = new Procedure(id_word, return_type, params, NULL, 0);
     _current_scope = saved;
     _current_scope->add_global(id_word->get_lexeme(), procedure); 
 
@@ -79,7 +80,7 @@ void Parser::make_built_in_functions()
     id_word =  new Word("putfloat", BASIC, 0);
     // Will be used in the put bool function
     params = new Parameter(new Id(new Word("float_val", BASIC, 0), new Type("float", BASIC, 4, 0), 0));
-    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    procedure = new Procedure(id_word, return_type, params, NULL, 0);
     _current_scope = saved;
     _current_scope->add_global(id_word->get_lexeme(), procedure);
 
@@ -88,7 +89,7 @@ void Parser::make_built_in_functions()
     id_word =  new Word("putinteger", BASIC, 0);
     // Will be used in the put bool function
     params = new Parameter(new Id(new Word("integer_val", BASIC, 0), new Type("integer", BASIC, 2, 0), 0));
-    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    procedure = new Procedure(id_word, return_type, params, NULL, 0);
     _current_scope = saved;
     _current_scope->add_global(id_word->get_lexeme(), procedure);  
 
@@ -97,7 +98,7 @@ void Parser::make_built_in_functions()
     id_word =  new Word("putstring", BASIC, 0);
     // Will be used in the put bool function
     params = new Parameter(new Id(new Word("string_val", BASIC, 0), new Type("string", BASIC, -1, 0), 0));
-    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    procedure = new Procedure(id_word, return_type, params, NULL, 0);
     _current_scope = saved;
     _current_scope->add_global(id_word->get_lexeme(), procedure);  
 }
@@ -122,7 +123,7 @@ void Parser::program()
         // s->generate(_writer);
         match(PROGRAM);
         match(END_DOT);
-        _logger->info("Program parsed with 0 error... welll that I found");
+        _logger->info("Program parsed with 0 error... well at least that I found");
     }
     catch(COMPILER_EXCEPTION e) 
     {
@@ -486,7 +487,7 @@ Expression* Parser::equality()
     Expression* expression = relationship();
     while(_lookahead->get_type()  == EQUALS || _lookahead->get_type()  == NOTEQUALS)
     {
-        Token* token = _lookahead; move(); expression = new Relationship(token, expression, relationship(),  _lookahead->get_line());
+        Token* token = _lookahead; move(); expression = new Relationship(token, expression, relationship(), new Type("bool", BOOL, 1, _lookahead->get_line()), _lookahead->get_line());
     }
     return expression;
 }
@@ -499,31 +500,31 @@ Expression* Parser::relationship()
         case LESS_THAN:
         {
             token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
-            break;
+            return expression;
         }
         case GREATER_THAN:
         {
             token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
-            break;
+            return expression;
         }
         case LESS_THAN_EQUALS:
         {
             token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
-            break;
+            return expression;
         }
         case GREATER_THAN_EQUALS:
         {
             token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
-            break;
+            return expression;
         }
+        // case EQUALS:
+        // {
+        //     token = _lookahead; move(); expression = new Relationship(token, expression, exp(),  _lookahead->get_line());
+        //     return expression;
+        // }
         default:
             return expression;
-
-        return NULL;
-
-
     }
-    return NULL;
 }
 
 Expression* Parser::exp()
@@ -561,7 +562,6 @@ Expression* Parser::unary()
     {
         return factor();
     }
-    return NULL;
     
 }
 

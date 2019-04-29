@@ -8,6 +8,7 @@
 #include "Id.h"
 #include "Expression.h"
 #include "Statement.h"
+#include "TypeChecker.h"
 using namespace std;
 
 class Set : public Statement
@@ -17,6 +18,7 @@ public:
     {
         _id = id;
         _expression = expression;
+        TypeChecker(id, expression, line);
     }
     void generate(Writer* writer)
     {
