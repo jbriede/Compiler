@@ -4,7 +4,6 @@
 
 #include "Lexer.h"
 
-
 Lexer::Lexer(Logger* logger)
 {
     _logger = logger;
@@ -173,8 +172,17 @@ Token* Lexer::get_token()
         }
         else if (_current_word == "=")
         {
-            _current_word = "";
-            return new Token(EQUALS, _current_lexer_line);
+            _peek_character_from_stream(_c);
+            if (strcmp(_c,"=") == 0)
+            {
+                _get_character_from_stream(_c);
+                _current_word = "";
+                return new Word("==", EQUALS, _current_lexer_line);
+            }
+            else
+            {
+               throw string("we should never be in this situation");
+            }
         }
         else if (_current_word == "[")
         {

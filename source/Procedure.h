@@ -12,9 +12,18 @@ using namespace std;
 class Procedure : public Id
 {
 public:
-    Procedure (Word* id, Type* type, Parameter* parameters, Statement* statement, int line): Id(id, type, line)
+    Procedure (Word* id, Type* return_type, Parameter* parameters, int line): Id(id, return_type, line)
     {
         _parameters = parameters;
+        _statement = NULL;
+    }
+    Procedure (Word* id, Type* return_type, Parameter* parameters, Statement* statements, int line): Id(id, return_type, line)
+    {
+        _parameters = parameters;
+        _statement = statements;
+    }
+    void set_statements(Statement* statement)
+    {
         _statement = statement;
     }
     Parameter* get_parameters()
@@ -24,6 +33,7 @@ public:
 private:
     Parameter* _parameters;
     Statement* _statement;
+    Word* _word;
 };
 
 #endif

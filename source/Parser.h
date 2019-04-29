@@ -27,6 +27,7 @@
 #include "Procedure.h"
 #include "ProcedureCall.h"
 #include "Argument.h"
+#include "Return.h"
 
 
 
@@ -54,6 +55,8 @@ private:
     /* Pointer to current level of Symbol table */
     ScopeVariables* _current_scope;
 
+    Procedure* _current_proc;
+
     void move();
     void match(int token_type);
 
@@ -76,6 +79,8 @@ private:
     Argument* arguments();
     Argument* argument();
     Expression* procedure_call(Id* id);
+
+    void make_built_in_functions();
 
 };
 

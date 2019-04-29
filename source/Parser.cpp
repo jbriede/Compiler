@@ -9,6 +9,7 @@ Parser::Parser(Logger* logger, Lexer* lexer, Writer* writer)
     _logger = logger;
     _lexer = lexer;
     _writer = writer;
+    _current_proc = NULL;
 }
 
 Parser::~Parser()
@@ -37,6 +38,70 @@ void Parser::match(int token_type)
     }
 }
 
+/*  This is how I've chosen to make the built in functions */
+void Parser::make_built_in_functions()
+{
+    Type* return_type = new Type("bool", BASIC, 1, 0);
+    Word* id_word =  new Word("getbool", BASIC, 0);
+    Parameter* params = NULL;
+    Procedure* procedure = new Procedure(id_word, return_type, NULL, NULL, 0);
+    _current_scope->add_global(id_word->get_lexeme(), procedure); 
+
+    return_type = new Type("integer", BASIC, 2, 0);
+    id_word =  new Word("getinteger", BASIC, 0);
+    params = NULL;
+    procedure = new Procedure(id_word, return_type, NULL, NULL, 0);
+    _current_scope->add_global(id_word->get_lexeme(), procedure); 
+
+    return_type = new Type("float", BASIC, 4, 0);
+    id_word =  new Word("getfloat", BASIC, 0);
+    params = NULL;
+    procedure = new Procedure(id_word, return_type, NULL, NULL, 0);
+    _current_scope->add_global(id_word->get_lexeme(), procedure); 
+
+    return_type = new Type("string", BASIC, -1, 0);
+    id_word =  new Word("getstring", BASIC, 0);
+    params = NULL;
+    procedure = new Procedure(id_word, return_type, NULL, NULL, 0);
+    _current_scope->add_global(id_word->get_lexeme(), procedure); 
+
+    ScopeVariables* saved = _current_scope;
+    _current_scope = new ScopeVariables(saved);
+    id_word =  new Word("putbool", BASIC, 0);
+    // Will be used in the put bool function
+    params = new Parameter(new Id(new Word("bool_val", BASIC, 0), new Type("bool", BASIC, 1, 0), 0));
+    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    _current_scope = saved;
+    _current_scope->add_global(id_word->get_lexeme(), procedure); 
+
+    saved = _current_scope;
+    _current_scope = new ScopeVariables(saved);
+    id_word =  new Word("putfloat", BASIC, 0);
+    // Will be used in the put bool function
+    params = new Parameter(new Id(new Word("float_val", BASIC, 0), new Type("float", BASIC, 4, 0), 0));
+    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    _current_scope = saved;
+    _current_scope->add_global(id_word->get_lexeme(), procedure);
+
+    saved = _current_scope;
+    _current_scope = new ScopeVariables(saved);
+    id_word =  new Word("putinteger", BASIC, 0);
+    // Will be used in the put bool function
+    params = new Parameter(new Id(new Word("integer_val", BASIC, 0), new Type("integer", BASIC, 2, 0), 0));
+    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    _current_scope = saved;
+    _current_scope->add_global(id_word->get_lexeme(), procedure);  
+
+    saved = _current_scope;
+    _current_scope = new ScopeVariables(saved);
+    id_word =  new Word("putstring", BASIC, 0);
+    // Will be used in the put bool function
+    params = new Parameter(new Id(new Word("string_val", BASIC, 0), new Type("string", BASIC, -1, 0), 0));
+    procedure = new Procedure(id_word, NULL, params, NULL, 0);
+    _current_scope = saved;
+    _current_scope->add_global(id_word->get_lexeme(), procedure);  
+}
+
 void Parser::program()
 {
     try 
@@ -52,10 +117,12 @@ void Parser::program()
         _current_scope->add(program_id->get_word()->get_lexeme(), program_id);
         match(ID);
         match(IS);
+        make_built_in_functions();
         Statement* s = block(false);
         // s->generate(_writer);
         match(PROGRAM);
         match(END_DOT);
+        _logger->info("Program parsed with 0 error... welll that I found");
     }
     catch(COMPILER_EXCEPTION e) 
     {
@@ -201,9 +268,12 @@ void Parser::declarations()
                 Parameter* params = parameters();
 
                 match(CLOSE_PARENTHESIS);
-
+                Procedure* procedure = new Procedure(id_word, return_type, params, id_token->get_line());
+                Procedure* saved_proc = _current_proc;
+                _current_proc = procedure;
                 Statement* procedure_statement = block(true);
-                Procedure* procedure = new Procedure(id_word, return_type, params, procedure_statement, id_token->get_line());
+                _current_proc = saved_proc;
+                procedure->set_statements(procedure_statement);
                 match(PROCEDURE);
                 match(SEMI_COLON);
 
@@ -357,9 +427,9 @@ Statement* Parser::statement()
         case RETURN:
         {
             match(RETURN);
-            Expression* hmm = boolean();
-            Id* return_id = reinterpret_cast<Id*>(hmm);
-            return NULL; // TODO
+            Expression* return_exp = boolean();
+            Return* ret = new Return(return_exp, _current_proc, _lookahead->get_line());
+            return ret;
         }
         case FOR:
         {
@@ -369,7 +439,7 @@ Statement* Parser::statement()
             Expression* expression = boolean();
             match(CLOSE_PARENTHESIS);
 
-            Statement* stmt = statement();
+            Statement* stmt = statements();
             match(END);
             match(FOR);
             match(SEMI_COLON);
@@ -389,8 +459,8 @@ Expression* Parser::procedure_call(Id* id)
     Argument* args = arguments();
     match(CLOSE_PARENTHESIS);
     Procedure* procedure = (Procedure*)id;
-    ProcedureCall* procedure_call = new ProcedureCall(procedure, args, _lookahead->get_line());
-    return procedure;
+    ProcedureCall* proc_call = new ProcedureCall(procedure, args, _lookahead->get_line());
+    return proc_call;
 }
 
 Expression* Parser::boolean()
@@ -586,6 +656,13 @@ Statement* Parser::assign()
             // hmm->generate(_writer);
             match(SEMI_COLON);
             return statement;
+        }
+        else if (_lookahead->get_type() == OPEN_PARENTHESIS)
+        {
+            //So this is a procedure call... it actually jumps and returns an expression... but since the expression doesnt return anything were in a weird spot i dont kow what to return... NULL?
+            match(OPEN_PARENTHESIS);
+            procedure_call(id);
+            return NULL;
         }
         else
         {

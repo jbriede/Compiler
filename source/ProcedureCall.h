@@ -5,16 +5,16 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#include "Statement.h"
+#include "Id.h"
 #include "Procedure.h"
 #include "Argument.h"
 
 using namespace std;
 
-class ProcedureCall : public Statement
+class ProcedureCall : public Id
 {
 public:
-    ProcedureCall(Procedure* procedure, Argument* arguments, int line): Statement(line)
+    ProcedureCall(Procedure* procedure, Argument* arguments, int line): Id(procedure->get_word(), procedure->get_type(), line)
     {
         _arguments = arguments;
         _procedure = procedure;
